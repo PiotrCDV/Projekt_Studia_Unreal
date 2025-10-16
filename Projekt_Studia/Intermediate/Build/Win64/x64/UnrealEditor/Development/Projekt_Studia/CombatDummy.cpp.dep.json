@@ -1,0 +1,23 @@
+{
+    "Version": "1.2",
+    "Data": {
+        "Source": "c:\\users\\pc\\documents\\github\\projekt_studia_unreal\\projekt_studia\\source\\projekt_studia\\variant_combat\\combatdummy.cpp",
+        "ProvidedModule": "",
+        "PCH": "c:\\users\\pc\\documents\\github\\projekt_studia_unreal\\projekt_studia\\intermediate\\build\\win64\\x64\\projekt_studiaeditor\\development\\unrealed\\sharedpch.unrealed.project.valapi.valexpapi.cpp20.h.pch",
+        "Includes": [
+            "c:\\users\\pc\\documents\\github\\projekt_studia_unreal\\projekt_studia\\intermediate\\build\\win64\\x64\\unrealeditor\\development\\projekt_studia\\definitions.projekt_studia.h",
+            "c:\\users\\pc\\documents\\github\\projekt_studia_unreal\\projekt_studia\\source\\projekt_studia\\variant_combat\\combatdummy.h",
+            "c:\\users\\pc\\documents\\github\\projekt_studia_unreal\\projekt_studia\\source\\projekt_studia\\variant_combat\\combatdamageable.h",
+            "c:\\users\\pc\\documents\\github\\projekt_studia_unreal\\projekt_studia\\intermediate\\build\\win64\\unrealeditor\\inc\\projekt_studia\\uht\\combatdamageable.generated.h",
+            "c:\\users\\pc\\documents\\github\\projekt_studia_unreal\\projekt_studia\\intermediate\\build\\win64\\unrealeditor\\inc\\projekt_studia\\uht\\combatdummy.generated.h",
+            "d:\\epic\\ue_5.6\\engine\\source\\runtime\\engine\\classes\\physicsengine\\physicsconstraintcomponent.h",
+            "d:\\epic\\ue_5.6\\engine\\source\\runtime\\engine\\classes\\physicsengine\\constraintinstance.h",
+            "d:\\epic\\ue_5.6\\engine\\source\\runtime\\engine\\classes\\physicsengine\\constraintdrives.h",
+            "d:\\epic\\ue_5.6\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\engine\\uht\\constraintdrives.generated.h",
+            "d:\\epic\\ue_5.6\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\engine\\uht\\constraintinstance.generated.h",
+            "d:\\epic\\ue_5.6\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\engine\\uht\\physicsconstraintcomponent.generated.h"
+        ],
+        "ImportedModules": [],
+        "ImportedHeaderUnits": []
+    }
+}

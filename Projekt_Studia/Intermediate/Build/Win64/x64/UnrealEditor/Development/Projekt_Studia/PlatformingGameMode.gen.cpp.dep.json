@@ -1,0 +1,19 @@
+{
+    "Version": "1.2",
+    "Data": {
+        "Source": "c:\\users\\pc\\documents\\github\\projekt_studia_unreal\\projekt_studia\\intermediate\\build\\win64\\unrealeditor\\inc\\projekt_studia\\uht\\platforminggamemode.gen.cpp",
+        "ProvidedModule": "",
+        "PCH": "c:\\users\\pc\\documents\\github\\projekt_studia_unreal\\projekt_studia\\intermediate\\build\\win64\\x64\\projekt_studiaeditor\\development\\unrealed\\sharedpch.unrealed.project.valapi.valexpapi.cpp20.h.pch",
+        "Includes": [
+            "c:\\users\\pc\\documents\\github\\projekt_studia_unreal\\projekt_studia\\intermediate\\build\\win64\\x64\\unrealeditor\\development\\projekt_studia\\definitions.projekt_studia.h",
+            "c:\\users\\pc\\documents\\github\\projekt_studia_unreal\\projekt_studia\\source\\projekt_studia\\variant_platforming\\platforminggamemode.h",
+            "d:\\epic\\ue_5.6\\engine\\source\\runtime\\engine\\classes\\gameframework\\gamemodebase.h",
+            "d:\\epic\\ue_5.6\\engine\\source\\runtime\\engine\\classes\\engine\\serverstatreplicator.h",
+            "d:\\epic\\ue_5.6\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\engine\\uht\\serverstatreplicator.generated.h",
+            "d:\\epic\\ue_5.6\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\engine\\uht\\gamemodebase.generated.h",
+            "c:\\users\\pc\\documents\\github\\projekt_studia_unreal\\projekt_studia\\intermediate\\build\\win64\\unrealeditor\\inc\\projekt_studia\\uht\\platforminggamemode.generated.h"
+        ],
+        "ImportedModules": [],
+        "ImportedHeaderUnits": []
+    }
+}
