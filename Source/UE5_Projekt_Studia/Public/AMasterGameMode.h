@@ -13,5 +13,8 @@ UCLASS()
 class UE5_PROJEKT_STUDIA_API AAMasterGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
+
+	public:
+		AAMasterGameMode();
 	
 };
