@@ -1,0 +1,28 @@
+{
+    "Version": "1.2",
+    "Data": {
+        "Source": "c:\\users\\pc\\documents\\github\\projekt_studia_unreal\\projekt_unreal\\intermediate\\build\\win64\\unrealeditor\\inc\\projekt_unreal\\uht\\sidescrollingaicontroller.gen.cpp",
+        "ProvidedModule": "",
+        "PCH": "c:\\users\\pc\\documents\\github\\projekt_studia_unreal\\projekt_unreal\\intermediate\\build\\win64\\x64\\projekt_unrealeditor\\development\\unrealed\\sharedpch.unrealed.project.valapi.valexpapi.cpp20.h.pch",
+        "Includes": [
+            "c:\\users\\pc\\documents\\github\\projekt_studia_unreal\\projekt_unreal\\intermediate\\build\\win64\\x64\\unrealeditor\\development\\projekt_unreal\\definitions.projekt_unreal.h",
+            "c:\\users\\pc\\documents\\github\\projekt_studia_unreal\\projekt_unreal\\source\\projekt_unreal\\variant_sidescrolling\\ai\\sidescrollingaicontroller.h",
+            "d:\\epic\\ue_5.6\\engine\\source\\runtime\\aimodule\\classes\\aicontroller.h",
+            "d:\\epic\\ue_5.6\\engine\\source\\runtime\\aimodule\\classes\\aitypes.h",
+            "d:\\epic\\ue_5.6\\engine\\source\\runtime\\navigationsystem\\public\\navigationsystemtypes.h",
+            "d:\\epic\\ue_5.6\\engine\\source\\runtime\\engine\\classes\\ai\\navigation\\navagentselector.h",
+            "d:\\epic\\ue_5.6\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\engine\\uht\\navagentselector.generated.h",
+            "d:\\epic\\ue_5.6\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\aimodule\\uht\\aitypes.generated.h",
+            "d:\\epic\\ue_5.6\\engine\\source\\runtime\\aimodule\\classes\\perception\\aiperceptionlistenerinterface.h",
+            "d:\\epic\\ue_5.6\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\aimodule\\uht\\aiperceptionlistenerinterface.generated.h",
+            "d:\\epic\\ue_5.6\\engine\\source\\runtime\\aimodule\\classes\\genericteamagentinterface.h",
+            "d:\\epic\\ue_5.6\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\aimodule\\uht\\genericteamagentinterface.generated.h",
+            "d:\\epic\\ue_5.6\\engine\\source\\runtime\\engine\\public\\visuallogger\\visualloggerdebugsnapshotinterface.h",
+            "d:\\epic\\ue_5.6\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\engine\\uht\\visualloggerdebugsnapshotinterface.generated.h",
+            "d:\\epic\\ue_5.6\\engine\\intermediate\\build\\win64\\unrealeditor\\inc\\aimodule\\uht\\aicontroller.generated.h",
+            "c:\\users\\pc\\documents\\github\\projekt_studia_unreal\\projekt_unreal\\intermediate\\build\\win64\\unrealeditor\\inc\\projekt_unreal\\uht\\sidescrollingaicontroller.generated.h"
+        ],
+        "ImportedModules": [],
+        "ImportedHeaderUnits": []
+    }
+}
