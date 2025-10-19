@@ -1,0 +1,8 @@
+// Copyright Epic Games, Inc. All Rights Reserved.
+
+#include "UE5_Projekt_Studia.h"
+#include "Modules/ModuleManager.h"
+
+IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, UE5_Projekt_Studia, "UE5_Projekt_Studia" );
+
+DEFINE_LOG_CATEGORY(LogUE5_Projekt_Studia)

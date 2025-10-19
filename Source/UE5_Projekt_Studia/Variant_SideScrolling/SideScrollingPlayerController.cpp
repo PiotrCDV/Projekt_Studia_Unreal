@@ -10,7 +10,7 @@
 #include "Engine/LocalPlayer.h"
 #include "Engine/World.h"
 #include "Blueprint/UserWidget.h"
-#include "Projekt_Unreal.h"
+#include "UE5_Projekt_Studia.h"
 #include "Widgets/Input/SVirtualJoystick.h"
 
 void ASideScrollingPlayerController::BeginPlay()
@@ -30,7 +30,7 @@ void ASideScrollingPlayerController::BeginPlay()
 
 		} else {
 
-			UE_LOG(LogProjekt_Unreal, Error, TEXT("Could not spawn mobile controls widget."));
+			UE_LOG(LogUE5_Projekt_Studia, Error, TEXT("Could not spawn mobile controls widget."));
 
 		}
 

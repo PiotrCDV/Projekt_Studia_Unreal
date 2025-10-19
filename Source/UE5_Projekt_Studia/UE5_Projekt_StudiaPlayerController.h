@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
-#include "Projekt_UnrealPlayerController.generated.h"
+#include "UE5_Projekt_StudiaPlayerController.generated.h"
 
 class UInputMappingContext;
 class UUserWidget;
@@ -14,7 +14,7 @@ class UUserWidget;
  *  Manages input mappings
  */
 UCLASS(abstract)
-class AProjekt_UnrealPlayerController : public APlayerController
+class AUE5_Projekt_StudiaPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 	

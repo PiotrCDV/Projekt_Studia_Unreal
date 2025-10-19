@@ -3,13 +3,13 @@
 using UnrealBuildTool;
 using System.Collections.Generic;
 
-public class Projekt_UnrealEditorTarget : TargetRules
+public class UE5_Projekt_StudiaTarget : TargetRules
 {
-	public Projekt_UnrealEditorTarget(TargetInfo Target) : base(Target)
+	public UE5_Projekt_StudiaTarget(TargetInfo Target) : base(Target)
 	{
-		Type = TargetType.Editor;
+		Type = TargetType.Game;
 		DefaultBuildSettings = BuildSettingsVersion.V5;
 		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_6;
-		ExtraModuleNames.Add("Projekt_Unreal");
+		ExtraModuleNames.Add("UE5_Projekt_Studia");
 	}
 }

@@ -2,9 +2,9 @@
 
 using UnrealBuildTool;
 
-public class Projekt_Unreal : ModuleRules
+public class UE5_Projekt_Studia : ModuleRules
 {
-	public Projekt_Unreal(ReadOnlyTargetRules Target) : base(Target)
+	public UE5_Projekt_Studia(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
@@ -24,20 +24,20 @@ public class Projekt_Unreal : ModuleRules
 		PrivateDependencyModuleNames.AddRange(new string[] { });
 
 		PublicIncludePaths.AddRange(new string[] {
-			"Projekt_Unreal",
-			"Projekt_Unreal/Variant_Platforming",
-			"Projekt_Unreal/Variant_Platforming/Animation",
-			"Projekt_Unreal/Variant_Combat",
-			"Projekt_Unreal/Variant_Combat/AI",
-			"Projekt_Unreal/Variant_Combat/Animation",
-			"Projekt_Unreal/Variant_Combat/Gameplay",
-			"Projekt_Unreal/Variant_Combat/Interfaces",
-			"Projekt_Unreal/Variant_Combat/UI",
-			"Projekt_Unreal/Variant_SideScrolling",
-			"Projekt_Unreal/Variant_SideScrolling/AI",
-			"Projekt_Unreal/Variant_SideScrolling/Gameplay",
-			"Projekt_Unreal/Variant_SideScrolling/Interfaces",
-			"Projekt_Unreal/Variant_SideScrolling/UI"
+			"UE5_Projekt_Studia",
+			"UE5_Projekt_Studia/Variant_Platforming",
+			"UE5_Projekt_Studia/Variant_Platforming/Animation",
+			"UE5_Projekt_Studia/Variant_Combat",
+			"UE5_Projekt_Studia/Variant_Combat/AI",
+			"UE5_Projekt_Studia/Variant_Combat/Animation",
+			"UE5_Projekt_Studia/Variant_Combat/Gameplay",
+			"UE5_Projekt_Studia/Variant_Combat/Interfaces",
+			"UE5_Projekt_Studia/Variant_Combat/UI",
+			"UE5_Projekt_Studia/Variant_SideScrolling",
+			"UE5_Projekt_Studia/Variant_SideScrolling/AI",
+			"UE5_Projekt_Studia/Variant_SideScrolling/Gameplay",
+			"UE5_Projekt_Studia/Variant_SideScrolling/Interfaces",
+			"UE5_Projekt_Studia/Variant_SideScrolling/UI"
 		});
 
 		// Uncomment if you are using Slate UI

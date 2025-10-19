@@ -1,6 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "Projekt_UnrealCharacter.h"
+#include "UE5_Projekt_StudiaCharacter.h"
 #include "Engine/LocalPlayer.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -10,9 +10,9 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
-#include "Projekt_Unreal.h"
+#include "UE5_Projekt_Studia.h"
 
-AProjekt_UnrealCharacter::AProjekt_UnrealCharacter()
+AUE5_Projekt_StudiaCharacter::AUE5_Projekt_StudiaCharacter()
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
@@ -50,7 +50,7 @@ AProjekt_UnrealCharacter::AProjekt_UnrealCharacter()
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 }
 
-void AProjekt_UnrealCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void AUE5_Projekt_StudiaCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	// Set up action bindings
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
@@ -60,19 +60,19 @@ void AProjekt_UnrealCharacter::SetupPlayerInputComponent(UInputComponent* Player
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 
 		// Moving
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AProjekt_UnrealCharacter::Move);
-		EnhancedInputComponent->BindAction(MouseLookAction, ETriggerEvent::Triggered, this, &AProjekt_UnrealCharacter::Look);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AUE5_Projekt_StudiaCharacter::Move);
+		EnhancedInputComponent->BindAction(MouseLookAction, ETriggerEvent::Triggered, this, &AUE5_Projekt_StudiaCharacter::Look);
 
 		// Looking
-		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AProjekt_UnrealCharacter::Look);
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AUE5_Projekt_StudiaCharacter::Look);
 	}
 	else
 	{
-		UE_LOG(LogProjekt_Unreal, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
+		UE_LOG(LogUE5_Projekt_Studia, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
 }
 
-void AProjekt_UnrealCharacter::Move(const FInputActionValue& Value)
+void AUE5_Projekt_StudiaCharacter::Move(const FInputActionValue& Value)
 {
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
@@ -81,7 +81,7 @@ void AProjekt_UnrealCharacter::Move(const FInputActionValue& Value)
 	DoMove(MovementVector.X, MovementVector.Y);
 }
 
-void AProjekt_UnrealCharacter::Look(const FInputActionValue& Value)
+void AUE5_Projekt_StudiaCharacter::Look(const FInputActionValue& Value)
 {
 	// input is a Vector2D
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
@@ -90,7 +90,7 @@ void AProjekt_UnrealCharacter::Look(const FInputActionValue& Value)
 	DoLook(LookAxisVector.X, LookAxisVector.Y);
 }
 
-void AProjekt_UnrealCharacter::DoMove(float Right, float Forward)
+void AUE5_Projekt_StudiaCharacter::DoMove(float Right, float Forward)
 {
 	if (GetController() != nullptr)
 	{
@@ -110,7 +110,7 @@ void AProjekt_UnrealCharacter::DoMove(float Right, float Forward)
 	}
 }
 
-void AProjekt_UnrealCharacter::DoLook(float Yaw, float Pitch)
+void AUE5_Projekt_StudiaCharacter::DoLook(float Yaw, float Pitch)
 {
 	if (GetController() != nullptr)
 	{
@@ -120,13 +120,13 @@ void AProjekt_UnrealCharacter::DoLook(float Yaw, float Pitch)
 	}
 }
 
-void AProjekt_UnrealCharacter::DoJumpStart()
+void AUE5_Projekt_StudiaCharacter::DoJumpStart()
 {
 	// signal the character to jump
 	Jump();
 }
 
-void AProjekt_UnrealCharacter::DoJumpEnd()
+void AUE5_Projekt_StudiaCharacter::DoJumpEnd()
 {
 	// signal the character to stop jumping
 	StopJumping();

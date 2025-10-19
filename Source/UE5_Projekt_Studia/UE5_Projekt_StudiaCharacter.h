@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
-#include "Projekt_UnrealCharacter.generated.h"
+#include "UE5_Projekt_StudiaCharacter.generated.h"
 
 class USpringArmComponent;
 class UCameraComponent;
@@ -19,7 +19,7 @@ DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
  *  Implements a controllable orbiting camera
  */
 UCLASS(abstract)
-class AProjekt_UnrealCharacter : public ACharacter
+class AUE5_Projekt_StudiaCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
@@ -52,7 +52,7 @@ protected:
 public:
 
 	/** Constructor */
-	AProjekt_UnrealCharacter();	
+	AUE5_Projekt_StudiaCharacter();	
 
 protected:
 

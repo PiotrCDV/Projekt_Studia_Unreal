@@ -4,20 +4,20 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "Projekt_UnrealGameMode.generated.h"
+#include "UE5_Projekt_StudiaGameMode.generated.h"
 
 /**
  *  Simple GameMode for a third person game
  */
 UCLASS(abstract)
-class AProjekt_UnrealGameMode : public AGameModeBase
+class AUE5_Projekt_StudiaGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 
 public:
 	
 	/** Constructor */
-	AProjekt_UnrealGameMode();
+	AUE5_Projekt_StudiaGameMode();
 };
 
 

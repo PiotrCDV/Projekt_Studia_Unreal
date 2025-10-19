@@ -1,15 +1,15 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 
-#include "Projekt_UnrealPlayerController.h"
+#include "UE5_Projekt_StudiaPlayerController.h"
 #include "EnhancedInputSubsystems.h"
 #include "Engine/LocalPlayer.h"
 #include "InputMappingContext.h"
 #include "Blueprint/UserWidget.h"
-#include "Projekt_Unreal.h"
+#include "UE5_Projekt_Studia.h"
 #include "Widgets/Input/SVirtualJoystick.h"
 
-void AProjekt_UnrealPlayerController::BeginPlay()
+void AUE5_Projekt_StudiaPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -26,14 +26,14 @@ void AProjekt_UnrealPlayerController::BeginPlay()
 
 		} else {
 
-			UE_LOG(LogProjekt_Unreal, Error, TEXT("Could not spawn mobile controls widget."));
+			UE_LOG(LogUE5_Projekt_Studia, Error, TEXT("Could not spawn mobile controls widget."));
 
 		}
 
 	}
 }
 
-void AProjekt_UnrealPlayerController::SetupInputComponent()
+void AUE5_Projekt_StudiaPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 

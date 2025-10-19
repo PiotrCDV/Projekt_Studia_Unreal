@@ -5,4 +5,4 @@
 #include "CoreMinimal.h"
 
 /** Main log category used across the project */
-DECLARE_LOG_CATEGORY_EXTERN(LogProjekt_Unreal, Log, All);
+DECLARE_LOG_CATEGORY_EXTERN(LogUE5_Projekt_Studia, Log, All);
