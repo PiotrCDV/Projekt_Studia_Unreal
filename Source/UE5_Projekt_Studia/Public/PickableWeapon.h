@@ -6,12 +6,13 @@
 #include "BaseInteractionActor.h"
 #include "PickableWeapon.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class UE5_PROJEKT_STUDIA_API APickableWeapon : public ABaseInteractionActor
 {
 	GENERATED_BODY()
-	
+
+public:
+	APickableWeapon();
+
+	virtual void PickUp(AActor* Interactor) override;
 };

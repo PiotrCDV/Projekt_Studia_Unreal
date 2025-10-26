@@ -7,6 +7,15 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "InputActionValue.h"
+#include "InteractionComponent.h" // Upewnij siê, ¿e jest dodany
+#include "PickableWeapon.h"
+#include "Components/SkeletalMeshComponent.h"
+
+AABasePlayerCharacter::AABasePlayerCharacter()
+{
+    InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
+
+}
 
 void AABasePlayerCharacter::Move(const FInputActionValue& Value)
 {
@@ -66,5 +75,19 @@ void AABasePlayerCharacter::Look(const FInputActionValue& Value)
 
     AddControllerYawInput(Look.X);
     AddControllerPitchInput(-Look.Y);
+}
+
+void AABasePlayerCharacter::Equip(APickableWeapon* Weapon)
+{
+    if (!Weapon) return;
+
+    // Ustaw referencjê do aktualnej broni
+    CurrentWeapon = Weapon;
+
+    // Podepnij broñ do socketu na mesh'u postaci
+    FName SocketName = TEXT("WeaponSocket");
+    Weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName);
+
+    UE_LOG(LogTemp, Warning, TEXT("Gracz wyposa¿y³ broñ: %s"), *Weapon->GetName());
 }
 

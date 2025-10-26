@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "InteractionInterface.h" // Dodaj ten include
 #include "BaseInteractionActor.generated.h"
 
 UCLASS()
-class UE5_PROJEKT_STUDIA_API ABaseInteractionActor : public AActor
+class UE5_PROJEKT_STUDIA_API ABaseInteractionActor : public AActor, public IInteractionInterface
 {
 	GENERATED_BODY()
 	
@@ -23,4 +24,9 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	// Dodaj deklaracjê funkcji Interact z interfejsu
+	virtual void Interact(AActor* Interactor) override;
+
+	// Dodaj wirtualn¹ funkcjê PickUp
+	virtual void PickUp(AActor* Interactor);
 };
