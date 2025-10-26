@@ -37,6 +37,7 @@ void AABasePlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
     if (UEnhancedInputComponent* EIC = Cast<UEnhancedInputComponent>(PlayerInputComponent))
     {
         EIC->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AABasePlayerCharacter::Move);
+        EIC->BindAction(LookAction, ETriggerEvent::Triggered, this, &AABasePlayerCharacter::Look);
     }
 }
 
