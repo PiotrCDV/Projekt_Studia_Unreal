@@ -21,12 +21,9 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// Dodaj deklaracjê funkcji Interact z interfejsu
 	virtual void Interact(AActor* Interactor) override;
 
-	// Dodaj wirtualn¹ funkcjê PickUp
 	virtual void PickUp(AActor* Interactor);
 };

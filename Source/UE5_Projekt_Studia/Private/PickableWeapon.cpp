@@ -2,7 +2,7 @@
 
 
 #include "PickableWeapon.h"
-#include "ABasePlayerCharacter.h" // Dodaj ten include
+#include "ABasePlayerCharacter.h" 
 
 APickableWeapon::APickableWeapon()
 {
@@ -15,7 +15,6 @@ void APickableWeapon::PickUp(AActor* Interactor)
 	if (Player)
 	{
 		Player->Equip(this);
-		UE_LOG(LogTemp, Warning, TEXT("Wywo³ano Equip na Pawn z broni¹: %s"), *GetName());
 	}
 }
 
