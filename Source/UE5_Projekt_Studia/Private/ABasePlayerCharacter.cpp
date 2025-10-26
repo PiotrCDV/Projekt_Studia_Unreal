@@ -7,7 +7,7 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "InputActionValue.h"
-#include "InteractionComponent.h" // Upewnij siê, ¿e jest dodany
+#include "InteractionComponent.h" 
 #include "PickableWeapon.h"
 #include "Components/SkeletalMeshComponent.h"
 
@@ -47,6 +47,10 @@ void AABasePlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
     {
         EIC->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AABasePlayerCharacter::Move);
         EIC->BindAction(LookAction, ETriggerEvent::Triggered, this, &AABasePlayerCharacter::Look);
+        if (EquipAction)
+        {
+            EIC->BindAction(EquipAction, ETriggerEvent::Triggered, this, &AABasePlayerCharacter::Interact);
+        }
     }
 }
 
@@ -81,13 +85,32 @@ void AABasePlayerCharacter::Equip(APickableWeapon* Weapon)
 {
     if (!Weapon) return;
 
-    // Ustaw referencjê do aktualnej broni
     CurrentWeapon = Weapon;
 
-    // Podepnij broñ do socketu na mesh'u postaci
     FName SocketName = TEXT("WeaponSocket");
-    Weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName);
 
-    UE_LOG(LogTemp, Warning, TEXT("Gracz wyposa¿y³ broñ: %s"), *Weapon->GetName());
+    if (USceneComponent* Grip = Weapon->GetGripPoint())
+    {
+        Grip->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName);
+    }
+    else
+    {
+        Weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName);
+    }
+
+    if (UPrimitiveComponent* PrimComp = Cast<UPrimitiveComponent>(Weapon->GetRootComponent()))
+    {
+        PrimComp->SetSimulatePhysics(false);
+        PrimComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    }
+
+}
+
+void AABasePlayerCharacter::Interact()
+{
+    if (InteractionComponent)
+    {
+        InteractionComponent->TryInteract(this);
+    }
 }
 

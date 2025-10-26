@@ -39,7 +39,9 @@ public:
     virtual void BeginPlay() override;
     void Look(const FInputActionValue& Value);
 	virtual void Equip(APickableWeapon* Weapon);
+    void Interact();
 };
+
 
 
 

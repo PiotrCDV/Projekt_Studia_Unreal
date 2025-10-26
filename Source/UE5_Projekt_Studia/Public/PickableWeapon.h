@@ -15,4 +15,9 @@ public:
 	APickableWeapon();
 
 	virtual void PickUp(AActor* Interactor) override;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
+	USceneComponent* GripPoint;
+
+	USceneComponent* GetGripPoint() const { return GripPoint; }
 };

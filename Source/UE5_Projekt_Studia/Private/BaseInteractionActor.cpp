@@ -25,15 +25,13 @@ void ABaseInteractionActor::Tick(float DeltaTime)
 
 }
 
-// Implementacja funkcji Interact z interfejsu
 void ABaseInteractionActor::Interact(AActor* Interactor)
 {
 	PickUp(Interactor);
 }
 
-// Domyœlna implementacja PickUp (mo¿esz nadpisaæ w klasach pochodnych)
 void ABaseInteractionActor::PickUp(AActor* Interactor)
 {
-	// Tutaj logika podnoszenia przedmiotu
+
 }
 
