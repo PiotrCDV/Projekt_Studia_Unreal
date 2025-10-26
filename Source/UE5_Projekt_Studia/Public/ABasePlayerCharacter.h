@@ -27,5 +27,12 @@ public:
      UInputAction* EquipAction;
      UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
      UInputAction* AttackAction;
-	
+     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+     UInputAction* LookAction;
+
+public:
+    virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+    void Move(const FInputActionValue& Value);
+    virtual void BeginPlay() override;
+    void Look(const FInputActionValue& Value);
 };
