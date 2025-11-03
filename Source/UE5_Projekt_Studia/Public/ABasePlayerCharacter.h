@@ -32,6 +32,8 @@ public:
      UInteractionComponent* InteractionComponent;
      UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
      APickableWeapon* CurrentWeapon;
+     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attack")
+     UAnimMontage* AttackMontage;
 
 public:
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -40,6 +42,7 @@ public:
     void Look(const FInputActionValue& Value);
 	virtual void Equip(APickableWeapon* Weapon);
     void Interact();
+    void Attack(const FInputActionValue& Value);
 };
 
 

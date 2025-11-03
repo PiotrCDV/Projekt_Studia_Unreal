@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "InteractionInterface.h" // Dodaj ten include
+#include "InteractionInterface.h" 
 #include "BaseInteractionActor.generated.h"
 
 UCLASS()
