@@ -18,6 +18,10 @@ class UE5_PROJEKT_STUDIA_API APickableWeapon : public ABaseInteractionActor
 public:
 	APickableWeapon();
 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	float BaseDamage = 40.0f;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UStaticMeshComponent* WeaponMesh;
 

@@ -16,6 +16,7 @@
 #include "Engine/EngineTypes.h"          
 #include "Math/Quat.h"                   
 #include "Math/Color.h"           
+#include "CombatInterface.h"
 
 AABasePlayerCharacter::AABasePlayerCharacter()
 {
@@ -208,16 +209,28 @@ void AABasePlayerCharacter::PerformAttackTrace()
         FLinearColor::Green,  
         0.1f                  
     );
-
     if (bHit)
     {
-        if (!HitActors.Contains(HitResult.GetActor()))
+        AActor* HitActor = HitResult.GetActor();
+
+        if (!HitActors.Contains(HitActor))
         {
-            HitActors.Add(HitResult.GetActor()); 
+            HitActors.Add(HitActor);
 
             FVector HitLocation = HitResult.Location;
-            AActor* HitActor = HitResult.GetActor();
+
+
+            if (HitActor->Implements<UCombatInterface>())
+            {
+
+                float DamageToDeal = CurrentWeapon->BaseDamage;
+
+                ICombatInterface::Execute_GetHit(HitActor, this, DamageToDeal);
+
+            }
         }
     }
+
+
 }
 
