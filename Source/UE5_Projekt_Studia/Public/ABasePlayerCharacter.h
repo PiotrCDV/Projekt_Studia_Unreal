@@ -17,6 +17,9 @@ class UE5_PROJEKT_STUDIA_API AABasePlayerCharacter : public AABaseCharacter
 public:
     AABasePlayerCharacter();
 
+    void StartWeaponTrace();
+    void EndWeaponTrace();
+
 public:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
      UInputMappingContext* MappingContext;
@@ -36,6 +39,7 @@ public:
      UAnimMontage* AttackMontage;
 
 public:
+    virtual void Tick(float DeltaTime) override;
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
     void Move(const FInputActionValue& Value);
     virtual void BeginPlay() override;
@@ -43,7 +47,20 @@ public:
 	virtual void Equip(APickableWeapon* Weapon);
     void Interact();
     void Attack(const FInputActionValue& Value);
+
+
+protected:
+    void PerformAttackTrace();
+
+
+private:
+    bool bIsAttacking;
+
+    UPROPERTY()
+    TArray<AActor*> HitActors;
 };
+
+
 
 
 

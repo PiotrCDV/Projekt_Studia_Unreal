@@ -10,10 +10,19 @@
 #include "InteractionComponent.h" 
 #include "PickableWeapon.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/BoxComponent.h"       
+#include "Kismet/KismetSystemLibrary.h"  
+#include "Engine/HitResult.h"            
+#include "Engine/EngineTypes.h"          
+#include "Math/Quat.h"                   
+#include "Math/Color.h"           
 
 AABasePlayerCharacter::AABasePlayerCharacter()
 {
     InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
+
+    PrimaryActorTick.bCanEverTick = true;
+    bIsAttacking = false;
 
 }
 
@@ -39,6 +48,17 @@ void AABasePlayerCharacter::Move(const FInputActionValue& Value)
     }
 }
 
+void AABasePlayerCharacter::Tick(float DeltaTime)
+{
+    Super::Tick(DeltaTime);
+    if (bIsAttacking)
+    {
+
+        PerformAttackTrace();
+
+    }
+}
+
 void AABasePlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
     Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -54,6 +74,19 @@ void AABasePlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
         if (AttackAction)
         {
             EIC->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AABasePlayerCharacter::Attack);
+        }
+    }
+    if (APlayerController* PC = Cast<APlayerController>(GetController()))
+    {
+        if (ULocalPlayer* LP = PC->GetLocalPlayer())
+        {
+            if (UEnhancedInputLocalPlayerSubsystem* Subsystem = LP->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
+            {
+                if (MappingContext)
+                {
+                    Subsystem->AddMappingContext(MappingContext, 0);
+                }
+            }
         }
     }
 }
@@ -95,7 +128,8 @@ void AABasePlayerCharacter::Equip(APickableWeapon* Weapon)
 
     if (USceneComponent* Grip = Weapon->GetGripPoint())
     {
-        Grip->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName);
+
+        Weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName);
     }
     else
     {
@@ -124,6 +158,66 @@ void AABasePlayerCharacter::Attack(const FInputActionValue& Value)
     if (AttackMontage)
     {
         PlayAnimMontage(AttackMontage);
+    }
+}
+
+void AABasePlayerCharacter::StartWeaponTrace()
+{
+    bIsAttacking = true;
+    HitActors.Empty();
+}
+
+void AABasePlayerCharacter::EndWeaponTrace()
+{
+    bIsAttacking = false;
+}
+
+void AABasePlayerCharacter::PerformAttackTrace()
+{
+    if (!CurrentWeapon || !CurrentWeapon->GetHitbox())
+    {
+        return; 
+    }
+
+    UBoxComponent* Hitbox = CurrentWeapon->GetHitbox();
+
+    FVector Start = Hitbox->GetComponentLocation();
+    FVector End = Start; 
+    FVector HalfSize = Hitbox->GetScaledBoxExtent();
+    FRotator Orientation = Hitbox->GetComponentRotation();
+
+    TArray<AActor*> ActorsToIgnore;
+    ActorsToIgnore.Add(this); 
+    ActorsToIgnore.Add(CurrentWeapon);
+
+    FHitResult HitResult;
+
+    bool bHit = UKismetSystemLibrary::BoxTraceSingle(
+        GetWorld(),
+        Start,
+        End,
+        HalfSize,
+        Orientation,
+        UEngineTypes::ConvertToTraceType(ECC_Visibility), 
+        false,
+        ActorsToIgnore,
+        EDrawDebugTrace::ForDuration, 
+        HitResult,
+        true,
+        FLinearColor::Red,    
+        FLinearColor::Green,  
+        0.1f                  
+    );
+
+    if (bHit)
+    {
+        if (!HitActors.Contains(HitResult.GetActor()))
+        {
+            HitActors.Add(HitResult.GetActor()); 
+
+            FVector HitLocation = HitResult.Location;
+            AActor* HitActor = HitResult.GetActor();
+        }
     }
 }
 
