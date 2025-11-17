@@ -17,6 +17,7 @@
 #include "Math/Quat.h"                   
 #include "Math/Color.h"           
 #include "CombatInterface.h"
+#include "InputMappingContext.h"
 
 AABasePlayerCharacter::AABasePlayerCharacter()
 {

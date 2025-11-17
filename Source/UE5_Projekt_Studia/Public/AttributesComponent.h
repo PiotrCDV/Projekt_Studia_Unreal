@@ -14,7 +14,6 @@ class UAttributesComponent : public UActorComponent
     GENERATED_BODY()
 
 public:
-    // Sets default values for this component's properties
     UAttributesComponent();
 
     UPROPERTY(BlueprintAssignable, Category = "Events")
@@ -40,9 +39,6 @@ protected:
 private:
     UPROPERTY(VisibleAnywhere, Category = "Attributes")
     float Health;
-
-public:
-    virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 
 };

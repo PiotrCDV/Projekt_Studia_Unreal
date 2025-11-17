@@ -13,15 +13,8 @@ class UE5_PROJEKT_STUDIA_API ABaseInteractionActor : public AActor, public IInte
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
+
 	ABaseInteractionActor();
-
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:	
-	virtual void Tick(float DeltaTime) override;
 
 	virtual void Interact(AActor* Interactor) override;
 

@@ -4,10 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "ABaseCharacter.h"
-#include "InteractionComponent.h"
-#include "InputMappingContext.h"
-#include "PickableWeapon.h"
 #include "ABasePlayerCharacter.generated.h"
+
+class UInputAction;
+class UInputMappingContext;
+class UInteractionComponent;
+class UAnimMontage;
+class APickableWeapon;
+struct FInputActionValue;
 
 UCLASS()
 class UE5_PROJEKT_STUDIA_API AABasePlayerCharacter : public AABaseCharacter

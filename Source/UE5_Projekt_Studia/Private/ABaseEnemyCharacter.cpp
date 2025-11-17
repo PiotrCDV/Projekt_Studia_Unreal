@@ -47,7 +47,6 @@ void AABaseEnemyCharacter::GetHit_Implementation(AActor* Attacker, float Damage)
 
 void AABaseEnemyCharacter::HandleDeath()
 {
-    UE_LOG(LogTemp, Warning, TEXT("%s zginal!"), *GetName());
 
     GetCharacterMovement()->StopMovementImmediately();
     GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
