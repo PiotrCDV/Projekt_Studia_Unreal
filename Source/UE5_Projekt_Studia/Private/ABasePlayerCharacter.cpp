@@ -75,7 +75,7 @@ void AABasePlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
         }
         if (AttackAction)
         {
-            EIC->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AABasePlayerCharacter::Attack);
+            EIC->BindAction(AttackAction, ETriggerEvent::Started, this, &AABasePlayerCharacter::Attack);
         }
     }
     if (APlayerController* PC = Cast<APlayerController>(GetController()))
@@ -154,14 +154,47 @@ void AABasePlayerCharacter::Interact()
     }
 }
 
+
 void AABasePlayerCharacter::Attack(const FInputActionValue& Value)
 {
-    UE_LOG(LogTemp, Warning, TEXT("Attack triggered!"));
+    if (bIsAttacking)
+    {
+        return;
+    }
+    if (GetMesh()->GetAnimInstance() && GetMesh()->GetAnimInstance()->Montage_IsPlaying(AttackMontage))
+    {
+        return;
+    }
+    if (!CurrentWeapon)
+    {
+        return;
+    }
+    bIsAttacking = true;
+
     if (AttackMontage)
     {
         PlayAnimMontage(AttackMontage);
+
+        if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
+        {
+            FOnMontageEnded EndedDelegate;
+            EndedDelegate.BindUObject(this, &AABasePlayerCharacter::OnAttackMontageEnded);
+            AnimInstance->Montage_SetEndDelegate(EndedDelegate, AttackMontage);
+        }
+    }
+    else
+    {
+        bIsAttacking = false;
     }
 }
+
+void AABasePlayerCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+
+    bIsAttacking = false;
+
+}
+
 
 void AABasePlayerCharacter::StartWeaponTrace()
 {

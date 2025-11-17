@@ -44,7 +44,29 @@ void AABaseEnemyCharacter::CheckForPlayerAndAttack()
         return;
     }
 
-    float Distance = FVector::Dist(GetActorLocation(), PlayerTarget->GetActorLocation());
+    FVector TargetLocation = PlayerTarget->GetActorLocation();
+    FVector SelfLocation = GetActorLocation();
+    float Distance = FVector::Dist(SelfLocation, TargetLocation);
+
+    if (CurrentPawnState != EPawnState::EPS_Attacking)
+    {
+        FVector Direction = (TargetLocation - SelfLocation);
+        Direction.Z = 0.0f;
+        Direction.Normalize();
+
+        FRotator TargetRotation = Direction.Rotation();
+
+        const float RotationSpeed = 10.0f; 
+        FRotator NewRotation = FMath::RInterpTo(
+            GetActorRotation(),
+            TargetRotation,
+            0.5f, 
+            RotationSpeed
+        );
+
+        SetActorRotation(FRotator(0.0f, NewRotation.Yaw, 0.0f));
+    }
+
 
     if (Distance <= AttackRange)
     {
@@ -59,7 +81,6 @@ void AABaseEnemyCharacter::CheckForPlayerAndAttack()
         SetPawnState(EPawnState::EPS_Idle);
     }
 }
-
 void AABaseEnemyCharacter::SetPawnState(EPawnState NewState)
 {
     CurrentPawnState = NewState;

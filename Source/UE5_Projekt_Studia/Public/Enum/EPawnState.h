@@ -9,7 +9,5 @@
  */
 class UE5_PROJEKT_STUDIA_API EPawnState
 {
-public:
-	EPawnState();
-	~EPawnState();
+
 };

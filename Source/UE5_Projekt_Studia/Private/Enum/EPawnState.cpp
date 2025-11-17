@@ -3,10 +3,4 @@
 
 #include "Enum/EPawnState.h"
 
-EPawnState::EPawnState()
-{
-}
 
-EPawnState::~EPawnState()
-{
-}

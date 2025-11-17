@@ -62,6 +62,11 @@ private:
 
     UPROPERTY()
     TArray<AActor*> HitActors;
+
+protected:
+
+    void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+
 };
 
 
