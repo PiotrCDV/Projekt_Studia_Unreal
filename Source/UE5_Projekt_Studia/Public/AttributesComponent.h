@@ -17,7 +17,7 @@ struct FStaminaCostStruct
     GENERATED_BODY()
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina Costs")
-    float CostAttack = 100.0f;
+    float CostAttack = 50.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina Costs")
     float CostSprint = 5.0f;

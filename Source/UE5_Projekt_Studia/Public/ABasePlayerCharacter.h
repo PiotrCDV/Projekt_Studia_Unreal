@@ -1,13 +1,17 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Plik: AABasePlayerCharacter.h
 
 #pragma once
 
-#include "Enum/PawnState.h" 
+#include "Enum/PawnState.h"
 #include "CoreMinimal.h"
 #include "ABaseCharacter.h"
 #include "ABasePlayerCharacter.generated.h"
 
-class UMainHUD; 
+// --- DODANE DLA PUNKTU 5 (KOMUNIKACJA HUD) ---
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPawnStateChanged, EPawnState, NewState);
+// ----------------------------------------------
+
+class UMainHUD;
 class UAttributesComponent;
 class UInputAction;
 class UInputMappingContext;
@@ -19,7 +23,7 @@ struct FInputActionValue;
 UCLASS()
 class UE5_PROJEKT_STUDIA_API AABasePlayerCharacter : public AABaseCharacter
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
     AABasePlayerCharacter();
@@ -27,71 +31,85 @@ public:
     void StartWeaponTrace();
     void EndWeaponTrace();
 
-    public:
+public:
     // Zmienna przechowuj¹ca aktualny stan
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
-    EPawnState CurrentPawnState = EPawnState::EPS_Idle; 
-    
+    EPawnState CurrentPawnState = EPawnState::EPS_Idle;
+
     // Funkcja do zmiany stanu (dostêpna z Blueprint)
     UFUNCTION(BlueprintCallable, Category = "State")
-    void SetPawnState(EPawnState NewState);
+    virtual void SetPawnState(EPawnState NewState); // Usuniêto 'override' jeœli brak w AABaseCharacter
 
 public:
     // Funkcja dostêpu (Get)
     UFUNCTION(BlueprintPure, Category = "State")
     FORCEINLINE EPawnState GetCurrentPawnState() const { return CurrentPawnState; }
 
+    // --- DODANE DLA PUNKTU 5 (DELEGAT STANU) ---
+    UPROPERTY(BlueprintAssignable, Category = "Events|State")
+    FOnPawnStateChanged OnPawnStateChanged;
+    // ---------------------------------------------
+
+
 protected:
     // **NOWE ZMIENNE HUD**
-    // 1. Klasa HUD do u¿ycia w Blueprint (musi byæ UMainHUD dla ³atwego rzutowania)
     UPROPERTY(EditDefaultsOnly, Category = "HUD")
     TSubclassOf<class UMainHUD> PlayerHUDWidgetClass;
 
-    // 2. Instancja wid¿etu (zawsze typu UUserWidget*, bo to zwraca CreateWidget)
     UPROPERTY()
     class UUserWidget* PlayerHUDWidgetInstance;
 
-    /** Funkcja inicjuj¹ca HUD, wywo³ywana np. w BeginPlay */
     void InitializeHUD();
     void SynchronizeHUD();
+
     // **NOWE FUNKCJE DLA DELEGATÓW (CALLBACKS)**
-    // 1. Funkcja wywo³ywana po zmianie Zdrowia
     UFUNCTION()
     void HandleHealthUpdate(UAttributesComponent* OwningComp, float Current, float Delta, float Max);
 
-    // 2. Funkcja wywo³ywana po zmianie Staminy
     UFUNCTION()
     void HandleStaminaUpdate(UAttributesComponent* OwningComp, float Current, float Delta, float Max);
 
-    // ... (pozosta³e funkcje)
+
+
+private:
+    // Zmienna stanu sprintu
+    bool bIsSprinting = false;
 
 protected:
-    // W³aœciwoœæ komponentu (Zak³adamy, ¿e jest to w³aœciwoœæ Twojej klasy bazowej)
+    // W³aœciwoœæ komponentu
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
     class UAttributesComponent* AttributesComponent;
 
 public:
-    // Funkcja dostêpu, której brakuje kompilatorowi
-    // Musi zwracaæ wskaŸnik do komponentu atrybutów.
+    // Funkcja dostêpu (FIX B£ÊDU E0020)
     FORCEINLINE UAttributesComponent* GetAttributesComponent() const { return AttributesComponent; }
 
 public:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
-     UInputMappingContext* MappingContext;
-     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
-     UInputAction* MoveAction;
-     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
-     UInputAction* EquipAction;
-     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
-     UInputAction* AttackAction;
-     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
-     UInputAction* LookAction;
-     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Interaction")
-     UInteractionComponent* InteractionComponent;
-     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
-     APickableWeapon* CurrentWeapon;
-     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attack")
-     UAnimMontage* AttackMontage;
+    UInputMappingContext* MappingContext;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+    UInputAction* MoveAction;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+    UInputAction* EquipAction;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+    UInputAction* AttackAction;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+    UInputAction* LookAction;
+
+    // --- DODANE AKCJE DLA PUNKTU 3/4 ---
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+    UInputAction* JumpAction;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
+    UInputAction* SprintAction;
+    // -----------------------------------
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Interaction")
+    UInteractionComponent* InteractionComponent;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
+    APickableWeapon* CurrentWeapon;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attack")
+    UAnimMontage* AttackMontage;
 
 public:
     virtual void Tick(float DeltaTime) override;
@@ -99,7 +117,7 @@ public:
     void Move(const FInputActionValue& Value);
     virtual void BeginPlay() override;
     void Look(const FInputActionValue& Value);
-	virtual void Equip(APickableWeapon* Weapon);
+    virtual void Equip(APickableWeapon* Weapon);
     void Interact();
     void Attack(const FInputActionValue& Value);
 
@@ -119,9 +137,3 @@ protected:
     void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
 };
-
-
-
-
-
-

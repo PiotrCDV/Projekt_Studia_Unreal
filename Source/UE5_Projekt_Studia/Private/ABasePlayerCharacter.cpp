@@ -10,7 +10,7 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "InputActionValue.h"
-#include "InteractionComponent.h" 
+#include "InteractionComponent.h"
 #include "PickableWeapon.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/BoxComponent.h"       
@@ -124,14 +124,12 @@ void AABasePlayerCharacter::BeginPlay()
 void AABasePlayerCharacter::SynchronizeHUD()
 {
     // Log wejœcia do funkcji
-    UE_LOG(LogTemp, Warning, TEXT("DEBUG: SynchronizeHUD - Funkcja wywolana."));
 
     if (UAttributesComponent* AttrComp = GetAttributesComponent())
     {
         // Log sprawdzenia wartoœci przed wys³aniem
         float CurrentHP = AttrComp->GetHealth();
         float MaxHP = AttrComp->GetMaxHealth();
-        UE_LOG(LogTemp, Warning, TEXT("DEBUG: SynchronizeHUD - AttrComp znaleziony. Wysylam Broadcast. HP: %f / %f"), CurrentHP, MaxHP);
 
         // 1. Rêczne wywo³anie delegata Zdrowia
         AttrComp->OnHealthChanged.Broadcast(AttrComp, CurrentHP, 0.0f, MaxHP);
@@ -142,52 +140,52 @@ void AABasePlayerCharacter::SynchronizeHUD()
     else
     {
         // Log b³êdu - brak komponentu
-        UE_LOG(LogTemp, Error, TEXT("DEBUG: SynchronizeHUD - B£¥D! GetAttributesComponent() zwrocil NULL!"));
     }
 }
 
+// Plik: AABasePlayerCharacter.cpp
+
 void AABasePlayerCharacter::InitializeHUD()
 {
-    UE_LOG(LogTemp, Warning, TEXT("DEBUG: InitializeHUD - Funkcja wywolana."));
-
-    // Sprawdzenie warunków wstêpnych
-    if (PlayerHUDWidgetClass && IsPlayerControlled())
+    // 1. Upewnij siê, ¿e klasa wid¿etu jest ustawiona i jest to Gracz
+    if (!PlayerHUDWidgetClass || !IsPlayerControlled())
     {
-        UE_LOG(LogTemp, Warning, TEXT("DEBUG: InitializeHUD - WidgetClass jest ustawiony i to jest Gracz. Tworze widget..."));
+        return;
+    }
 
-        // 1. STWÓRZ WID¯ET
-        PlayerHUDWidgetInstance = CreateWidget<UUserWidget>(GetWorld(), PlayerHUDWidgetClass);
+    // 2. Utwórz wid¿et
+    PlayerHUDWidgetInstance = CreateWidget<UUserWidget>(GetWorld(), PlayerHUDWidgetClass);
 
-        if (PlayerHUDWidgetInstance)
+    if (PlayerHUDWidgetInstance)
+    {
+        PlayerHUDWidgetInstance->AddToViewport();
+
+        // 3. POD£¥CZ DELEGATY I SYNCHRONIZUJ
+        if (UAttributesComponent* AttrComp = GetAttributesComponent())
         {
-            UE_LOG(LogTemp, Warning, TEXT("DEBUG: InitializeHUD - Widget utworzony pomyslnie. Dodaje do Viewportu."));
+            // Pod³¹czenie delegatów ZDROWIA i STAMINY (do funkcji zdefiniowanych w AABasePlayerCharacter)
+            AttrComp->OnHealthChanged.AddDynamic(this, &AABasePlayerCharacter::HandleHealthUpdate);
+            AttrComp->OnStaminaChanged.AddDynamic(this, &AABasePlayerCharacter::HandleStaminaUpdate);
 
-            // 2. DODAJ DO VIEWPORTU
-            PlayerHUDWidgetInstance->AddToViewport();
-
-            // 3. POD£¥CZ DELEGATY:
-            if (UAttributesComponent* AttrComp = GetAttributesComponent())
+            // --- POD£¥CZENIE DELEGATA STANU DO HUD (Punkt 5) ---
+            if (UMainHUD* HUDWidget = Cast<UMainHUD>(PlayerHUDWidgetInstance))
             {
-                UE_LOG(LogTemp, Warning, TEXT("DEBUG: InitializeHUD - Podpinam delegaty (Bind)."));
+                // Musimy mieæ pewnoœæ, ¿e mamy delegat i funkcjê
+                OnPawnStateChanged.AddDynamic(HUDWidget, &UMainHUD::HandlePawnStateUpdate);
+            }
+            // ----------------------------------------------------
 
-                // Podpinamy funkcje Handle...Update do delegatów atrybutów.
-                AttrComp->OnHealthChanged.AddDynamic(this, &AABasePlayerCharacter::HandleHealthUpdate);
-                AttrComp->OnStaminaChanged.AddDynamic(this, &AABasePlayerCharacter::HandleStaminaUpdate);
-            }
-            else
-            {
-                UE_LOG(LogTemp, Error, TEXT("DEBUG: InitializeHUD - B£¥D! Nie znaleziono AttributesComponent przy probie podpiecia delegatow!"));
-            }
+            // Wstêpna synchronizacja: wywo³aj delegaty raz, aby paski wyœwietli³y siê poprawnie (np. 100%)
+            AttrComp->OnHealthChanged.Broadcast(AttrComp, AttrComp->GetHealth(), 0.0f, AttrComp->GetMaxHealth());
+            AttrComp->OnStaminaChanged.Broadcast(AttrComp, AttrComp->GetStamina(), 0.0f, AttrComp->GetMaxStamina());
+
+            // Wstêpne ustawienie tekstu stanu (zwykle EPS_Idle)
+            OnPawnStateChanged.Broadcast(GetCurrentPawnState());
         }
         else
         {
-            UE_LOG(LogTemp, Error, TEXT("DEBUG: InitializeHUD - B£¥D! CreateWidget zwrocil NULL (nie udalo sie stworzyc widgetu)."));
+            // Wypisz b³¹d, jeœli komponent atrybutów jest NULL (czêsty problem)
         }
-    }
-    else
-    {
-        if (!PlayerHUDWidgetClass) UE_LOG(LogTemp, Error, TEXT("DEBUG: InitializeHUD - B£¥D! PlayerHUDWidgetClass jest NULL (nie ustawiles BP w Details postac)!"));
-        if (!IsPlayerControlled()) UE_LOG(LogTemp, Error, TEXT("DEBUG: InitializeHUD - Info: To nie jest postac sterowana przez gracza (IsPlayerControlled = false)."));
     }
 }
 
@@ -251,6 +249,7 @@ void AABasePlayerCharacter::Equip(APickableWeapon* Weapon)
 
 }
 // Plik: AABaseCharacter.cpp
+// Plik: AABasePlayerCharacter.cpp
 
 void AABasePlayerCharacter::SetPawnState(EPawnState NewState)
 {
@@ -258,27 +257,23 @@ void AABasePlayerCharacter::SetPawnState(EPawnState NewState)
     {
         CurrentPawnState = NewState;
 
-        // Logika specyficzna dla tego stanu:
-        if (NewState == EPawnState::EPS_Exhausted)
+        // --- DODANE: POWIADOMIENIE HUD O ZMIANIE STANU ---
+        OnPawnStateChanged.Broadcast(NewState); 
+        // --------------------------------------------------
+
+        if (UCharacterMovementComponent* Movement = GetCharacterMovement())
         {
-            // Opcjonalnie: Zmniejsz prêdkoœæ poruszania siê do bardzo niskiej
-            if (UCharacterMovementComponent* Movement = GetCharacterMovement())
+            if (NewState == EPawnState::EPS_Exhausted)
             {
-                // To jest kluczowe, aby uniemo¿liwiæ sprint, gdy stamina = 0.
+                // Ustawienie niskiej prêdkoœci na czas wyczerpania (100.0f)
                 Movement->MaxWalkSpeed = 100.0f;
             }
-        }
-        else if (CurrentPawnState == EPawnState::EPS_Idle)
-        {
-            // Wróæ do standardowej prêdkoœci (u¿yj swojej wartoœci bazowej)
-            if (UCharacterMovementComponent* Movement = GetCharacterMovement())
+            else // Powrót do standardowej prêdkoœci (IDLE, Combat, etc.)
             {
-                Movement->MaxWalkSpeed = 600.0f; // Walk Speed
+                // U¿yj rozs¹dnej prêdkoœci chodu.
+                Movement->MaxWalkSpeed = 600.0f; 
             }
         }
-
-        // W przysz³oœci mo¿esz dodaæ tu wywo³anie delegata (OnStateChanged), jeœli chcesz,
-        // aby inni gracze/HUD reagowali na stan postaci.
     }
 }
 void AABasePlayerCharacter::Interact()
@@ -292,9 +287,11 @@ void AABasePlayerCharacter::Interact()
 
 // Plik: AABasePlayerCharacter.cpp
 
+// Plik: AABasePlayerCharacter.cpp
+
 void AABasePlayerCharacter::Attack(const FInputActionValue& Value)
 {
-    // ... (Twoje istniej¹ce warunki sprawdzaj¹ce blokady: bIsAttacking, CurrentWeapon, AnimMontage) ...
+    // ... (Twoje istniej¹ce warunki sprawdzaj¹ce blokady) ...
     if (bIsAttacking || !CurrentWeapon)
     {
         return;
@@ -304,7 +301,7 @@ void AABasePlayerCharacter::Attack(const FInputActionValue& Value)
         return;
     }
 
-    // --- LOGIKA KOSZTU STAMINY (PUNKT 3) ---
+    // --- LOGIKA KOSZTU STAMINY ---
     if (UAttributesComponent* AttrComp = GetAttributesComponent())
     {
         float AttackCost = AttrComp->StaminaCosts.CostAttack;
@@ -317,8 +314,11 @@ void AABasePlayerCharacter::Attack(const FInputActionValue& Value)
         }
     }
 
-    // --- WYKONANIE AKCJI ---
+    // --- WYKONANIE AKCJI I ZMIANA STANU ---
     bIsAttacking = true;
+
+    //  Ustawienie stanu na ATAK
+    SetPawnState(EPawnState::EPS_Attacking);
 
     if (AttackMontage)
     {
@@ -334,14 +334,17 @@ void AABasePlayerCharacter::Attack(const FInputActionValue& Value)
     else
     {
         bIsAttacking = false;
+        // Jeœli nie ma monta¿u, stan wraca natychmiast
+        SetPawnState(EPawnState::EPS_Idle);
     }
 }
 
 void AABasePlayerCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-
     bIsAttacking = false;
 
+    // Resetowanie stanu na IDLE po zakoñczeniu animacji
+    SetPawnState(EPawnState::EPS_Idle);
 }
 
 
