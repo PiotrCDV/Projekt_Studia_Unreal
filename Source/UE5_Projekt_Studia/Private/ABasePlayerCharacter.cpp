@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
+#include "AttributesComponent.h"
+#include "Widget/MainHUD.h" 
+#include "Blueprint/UserWidget.h"
 #include "ABasePlayerCharacter.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -22,6 +24,8 @@
 AABasePlayerCharacter::AABasePlayerCharacter()
 {
     InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
+
+    AttributesComponent = CreateDefaultSubobject<UAttributesComponent>(TEXT("AttributesComponent"));
 
     PrimaryActorTick.bCanEverTick = true;
     bIsAttacking = false;
@@ -96,7 +100,8 @@ void AABasePlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 void AABasePlayerCharacter::BeginPlay()
 {
     Super::BeginPlay();
-
+    InitializeHUD();
+    SynchronizeHUD();
     if (APlayerController* PC = Cast<APlayerController>(Controller))
     {
         if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer()))
@@ -111,6 +116,105 @@ void AABasePlayerCharacter::BeginPlay()
 
 }
 
+// Plik: AABasePlayerCharacter.cpp
+
+// Plik: AABasePlayerCharacter.cpp
+
+void AABasePlayerCharacter::SynchronizeHUD()
+{
+    // Log wejœcia do funkcji
+    UE_LOG(LogTemp, Warning, TEXT("DEBUG: SynchronizeHUD - Funkcja wywolana."));
+
+    if (UAttributesComponent* AttrComp = GetAttributesComponent())
+    {
+        // Log sprawdzenia wartoœci przed wys³aniem
+        float CurrentHP = AttrComp->GetHealth();
+        float MaxHP = AttrComp->GetMaxHealth();
+        UE_LOG(LogTemp, Warning, TEXT("DEBUG: SynchronizeHUD - AttrComp znaleziony. Wysylam Broadcast. HP: %f / %f"), CurrentHP, MaxHP);
+
+        // 1. Rêczne wywo³anie delegata Zdrowia
+        AttrComp->OnHealthChanged.Broadcast(AttrComp, CurrentHP, 0.0f, MaxHP);
+
+        // 2. Rêczne wywo³anie delegata Staminy
+        AttrComp->OnStaminaChanged.Broadcast(AttrComp, AttrComp->GetStamina(), 0.0f, AttrComp->GetMaxStamina());
+    }
+    else
+    {
+        // Log b³êdu - brak komponentu
+        UE_LOG(LogTemp, Error, TEXT("DEBUG: SynchronizeHUD - B£¥D! GetAttributesComponent() zwrocil NULL!"));
+    }
+}
+
+void AABasePlayerCharacter::InitializeHUD()
+{
+    UE_LOG(LogTemp, Warning, TEXT("DEBUG: InitializeHUD - Funkcja wywolana."));
+
+    // Sprawdzenie warunków wstêpnych
+    if (PlayerHUDWidgetClass && IsPlayerControlled())
+    {
+        UE_LOG(LogTemp, Warning, TEXT("DEBUG: InitializeHUD - WidgetClass jest ustawiony i to jest Gracz. Tworze widget..."));
+
+        // 1. STWÓRZ WID¯ET
+        PlayerHUDWidgetInstance = CreateWidget<UUserWidget>(GetWorld(), PlayerHUDWidgetClass);
+
+        if (PlayerHUDWidgetInstance)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("DEBUG: InitializeHUD - Widget utworzony pomyslnie. Dodaje do Viewportu."));
+
+            // 2. DODAJ DO VIEWPORTU
+            PlayerHUDWidgetInstance->AddToViewport();
+
+            // 3. POD£¥CZ DELEGATY:
+            if (UAttributesComponent* AttrComp = GetAttributesComponent())
+            {
+                UE_LOG(LogTemp, Warning, TEXT("DEBUG: InitializeHUD - Podpinam delegaty (Bind)."));
+
+                // Podpinamy funkcje Handle...Update do delegatów atrybutów.
+                AttrComp->OnHealthChanged.AddDynamic(this, &AABasePlayerCharacter::HandleHealthUpdate);
+                AttrComp->OnStaminaChanged.AddDynamic(this, &AABasePlayerCharacter::HandleStaminaUpdate);
+            }
+            else
+            {
+                UE_LOG(LogTemp, Error, TEXT("DEBUG: InitializeHUD - B£¥D! Nie znaleziono AttributesComponent przy probie podpiecia delegatow!"));
+            }
+        }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("DEBUG: InitializeHUD - B£¥D! CreateWidget zwrocil NULL (nie udalo sie stworzyc widgetu)."));
+        }
+    }
+    else
+    {
+        if (!PlayerHUDWidgetClass) UE_LOG(LogTemp, Error, TEXT("DEBUG: InitializeHUD - B£¥D! PlayerHUDWidgetClass jest NULL (nie ustawiles BP w Details postac)!"));
+        if (!IsPlayerControlled()) UE_LOG(LogTemp, Error, TEXT("DEBUG: InitializeHUD - Info: To nie jest postac sterowana przez gracza (IsPlayerControlled = false)."));
+    }
+}
+
+/** * Implementacja: Wywo³ywana przez delegata UAttributesComponent::OnHealthChanged.
+ * Przekazuje now¹ wartoœæ do paska w HUD.
+ */
+void AABasePlayerCharacter::HandleHealthUpdate(UAttributesComponent* OwningComp, float Current, float Delta, float Max)
+{
+    // 1. Rzutujemy generyczn¹ instancjê na nasz¹ klasê C++ UMainHUD.
+    if (UMainHUD* HUDWidget = Cast<UMainHUD>(PlayerHUDWidgetInstance))
+    {
+        // 2. Wywo³ujemy natywn¹ funkcjê C++ w wid¿ecie, która zaktualizuje pasek.
+        HUDWidget->UpdateHealth(Current, Max);
+    }
+}
+
+/** * Implementacja: Wywo³ywana przez delegata UAttributesComponent::OnStaminaChanged.
+ * Przekazuje now¹ wartoœæ do paska w HUD.
+ */
+void AABasePlayerCharacter::HandleStaminaUpdate(UAttributesComponent* OwningComp, float Current, float Delta, float Max)
+{
+    // 1. Rzutujemy generyczn¹ instancjê na nasz¹ klasê C++ UMainHUD.
+    if (UMainHUD* HUDWidget = Cast<UMainHUD>(PlayerHUDWidgetInstance))
+    {
+        // 2. Wywo³ujemy natywn¹ funkcjê C++ w wid¿ecie, która zaktualizuje pasek.
+        HUDWidget->UpdateStamina(Current, Max);
+    }
+}
 void AABasePlayerCharacter::Look(const FInputActionValue& Value)
 {
     const FVector2D Look = Value.Get<FVector2D>();
@@ -155,9 +259,12 @@ void AABasePlayerCharacter::Interact()
 }
 
 
+// Plik: AABasePlayerCharacter.cpp
+
 void AABasePlayerCharacter::Attack(const FInputActionValue& Value)
 {
-    if (bIsAttacking)
+    // ... (Twoje istniej¹ce warunki sprawdzaj¹ce blokady: bIsAttacking, CurrentWeapon, AnimMontage) ...
+    if (bIsAttacking || !CurrentWeapon)
     {
         return;
     }
@@ -165,10 +272,21 @@ void AABasePlayerCharacter::Attack(const FInputActionValue& Value)
     {
         return;
     }
-    if (!CurrentWeapon)
+
+    // --- LOGIKA KOSZTU STAMINY (PUNKT 3) ---
+    if (UAttributesComponent* AttrComp = GetAttributesComponent())
     {
-        return;
+        float AttackCost = AttrComp->StaminaCosts.CostAttack;
+
+        // TryConsumeStamina: sprawdza, czy mo¿na zap³aciæ, i jeœli tak, zu¿ywa staminê
+        if (!AttrComp->TryConsumeStamina(AttackCost))
+        {
+            // Brak staminy, przerywamy akcjê
+            return;
+        }
     }
+
+    // --- WYKONANIE AKCJI ---
     bIsAttacking = true;
 
     if (AttackMontage)

@@ -6,6 +6,8 @@
 #include "ABaseCharacter.h"
 #include "ABasePlayerCharacter.generated.h"
 
+class UMainHUD; 
+class UAttributesComponent;
 class UInputAction;
 class UInputMappingContext;
 class UInteractionComponent;
@@ -23,6 +25,40 @@ public:
 
     void StartWeaponTrace();
     void EndWeaponTrace();
+
+protected:
+    // **NOWE ZMIENNE HUD**
+    // 1. Klasa HUD do u¿ycia w Blueprint (musi byæ UMainHUD dla ³atwego rzutowania)
+    UPROPERTY(EditDefaultsOnly, Category = "HUD")
+    TSubclassOf<class UMainHUD> PlayerHUDWidgetClass;
+
+    // 2. Instancja wid¿etu (zawsze typu UUserWidget*, bo to zwraca CreateWidget)
+    UPROPERTY()
+    class UUserWidget* PlayerHUDWidgetInstance;
+
+    /** Funkcja inicjuj¹ca HUD, wywo³ywana np. w BeginPlay */
+    void InitializeHUD();
+    void SynchronizeHUD();
+    // **NOWE FUNKCJE DLA DELEGATÓW (CALLBACKS)**
+    // 1. Funkcja wywo³ywana po zmianie Zdrowia
+    UFUNCTION()
+    void HandleHealthUpdate(UAttributesComponent* OwningComp, float Current, float Delta, float Max);
+
+    // 2. Funkcja wywo³ywana po zmianie Staminy
+    UFUNCTION()
+    void HandleStaminaUpdate(UAttributesComponent* OwningComp, float Current, float Delta, float Max);
+
+    // ... (pozosta³e funkcje)
+
+protected:
+    // W³aœciwoœæ komponentu (Zak³adamy, ¿e jest to w³aœciwoœæ Twojej klasy bazowej)
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+    class UAttributesComponent* AttributesComponent;
+
+public:
+    // Funkcja dostêpu, której brakuje kompilatorowi
+    // Musi zwracaæ wskaŸnik do komponentu atrybutów.
+    FORCEINLINE UAttributesComponent* GetAttributesComponent() const { return AttributesComponent; }
 
 public:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
