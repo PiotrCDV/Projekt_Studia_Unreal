@@ -1,5 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+#include "Enum/PawnState.h"
 #include "AttributesComponent.h"
 #include "Widget/MainHUD.h" 
 #include "Blueprint/UserWidget.h"
@@ -249,7 +250,37 @@ void AABasePlayerCharacter::Equip(APickableWeapon* Weapon)
     }
 
 }
+// Plik: AABaseCharacter.cpp
 
+void AABasePlayerCharacter::SetPawnState(EPawnState NewState)
+{
+    if (CurrentPawnState != NewState)
+    {
+        CurrentPawnState = NewState;
+
+        // Logika specyficzna dla tego stanu:
+        if (NewState == EPawnState::EPS_Exhausted)
+        {
+            // Opcjonalnie: Zmniejsz prêdkoœæ poruszania siê do bardzo niskiej
+            if (UCharacterMovementComponent* Movement = GetCharacterMovement())
+            {
+                // To jest kluczowe, aby uniemo¿liwiæ sprint, gdy stamina = 0.
+                Movement->MaxWalkSpeed = 100.0f;
+            }
+        }
+        else if (CurrentPawnState == EPawnState::EPS_Idle)
+        {
+            // Wróæ do standardowej prêdkoœci (u¿yj swojej wartoœci bazowej)
+            if (UCharacterMovementComponent* Movement = GetCharacterMovement())
+            {
+                Movement->MaxWalkSpeed = 600.0f; // Walk Speed
+            }
+        }
+
+        // W przysz³oœci mo¿esz dodaæ tu wywo³anie delegata (OnStateChanged), jeœli chcesz,
+        // aby inni gracze/HUD reagowali na stan postaci.
+    }
+}
 void AABasePlayerCharacter::Interact()
 {
     if (InteractionComponent)

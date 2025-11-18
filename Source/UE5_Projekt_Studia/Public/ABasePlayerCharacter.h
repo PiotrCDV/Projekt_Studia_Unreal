@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "Enum/PawnState.h" 
 #include "CoreMinimal.h"
 #include "ABaseCharacter.h"
 #include "ABasePlayerCharacter.generated.h"
@@ -25,6 +26,20 @@ public:
 
     void StartWeaponTrace();
     void EndWeaponTrace();
+
+    public:
+    // Zmienna przechowuj¹ca aktualny stan
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
+    EPawnState CurrentPawnState = EPawnState::EPS_Idle; 
+    
+    // Funkcja do zmiany stanu (dostêpna z Blueprint)
+    UFUNCTION(BlueprintCallable, Category = "State")
+    void SetPawnState(EPawnState NewState);
+
+public:
+    // Funkcja dostêpu (Get)
+    UFUNCTION(BlueprintPure, Category = "State")
+    FORCEINLINE EPawnState GetCurrentPawnState() const { return CurrentPawnState; }
 
 protected:
     // **NOWE ZMIENNE HUD**
