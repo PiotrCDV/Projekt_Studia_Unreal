@@ -10,6 +10,7 @@
 #include "ABaseEnemyCharacter.generated.h"
 
 class UAttributesComponent;
+class APickableWeapon;
 
 UCLASS()
 class UE5_PROJEKT_STUDIA_API AABaseEnemyCharacter : public AABaseCharacter, public ICombatInterface
@@ -65,4 +66,12 @@ protected:
 
     UFUNCTION()
     void HandleDeath();
+    UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Combat")
+    APickableWeapon* EquippedWeapon;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Combat")
+    TSubclassOf<APickableWeapon> DefaultWeaponClass;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Combat")
+    FName WeaponSocketName = TEXT("WeaponSocket");
 };
