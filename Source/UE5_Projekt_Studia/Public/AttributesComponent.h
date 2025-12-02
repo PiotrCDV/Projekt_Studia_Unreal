@@ -10,7 +10,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeathDelegate);
 // Nowy, szczegó³owy delegat do aktualizacji HUD (zdrowie i stamina)
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnAttributeChangedDelegate, UAttributesComponent*, OwningComp, float, NewValue, float, Delta, float, MaxValue);
 
-// NOWY: Deklaracja delegata wywo³ywanego, gdy Stamina spadnie do 0 (Punkt 121)
+// NOWY: Deklaracja delegata wywo³ywanego, gdy Stamina spadnie do 0
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStaminaExhaustedDelegate);
 
 // Nowa struktura do przechowywania kosztów akcji
@@ -41,7 +41,6 @@ class UE5_PROJEKT_STUDIA_API UAttributesComponent : public UActorComponent
 public:
     UAttributesComponent();
 
-    // --- DELEGATY ---
     UPROPERTY(BlueprintAssignable, Category = "Events")
     FOnDeathDelegate OnDeath;
 
@@ -51,11 +50,9 @@ public:
     UPROPERTY(BlueprintAssignable, Category = "Events")
     FOnAttributeChangedDelegate OnStaminaChanged;
 
-    // NOWY: Delegat Stamina Exhausted
     UPROPERTY(BlueprintAssignable, Category = "Events")
     FOnStaminaExhaustedDelegate OnStaminaExhausted;
 
-    // --- ZDROWIE ---
     UFUNCTION(BlueprintCallable, Category = "Attributes")
     void ApplyDamage(float Damage);
 
@@ -68,12 +65,10 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Attributes")
     void SetHealth(float NewHealth);
 
-    // --- STAMINA ---
-    // Zmieniona nazwa TryConsumeStamina -> TryPayStaminaCost (Punkt 122)
+
     UFUNCTION(BlueprintCallable, Category = "Attributes")
     bool TryPayStaminaCost(float StaminaCost);
 
-    // NOWY: Sprawdza, czy mo¿e zap³aciæ (Punkt 120)
     UFUNCTION(BlueprintCallable, Category = "Attributes")
     bool CanPayStaminaCost(float StaminaCost) const { return Stamina >= StaminaCost; }
 
@@ -83,7 +78,6 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Attributes")
     float GetMaxStamina() const { return MaxStamina; }
 
-    // Struktura Kosztów
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes")
     FStaminaCostStruct StaminaCosts;
 
@@ -92,7 +86,6 @@ protected:
 
     virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-    // --- Zmienne ---
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attributes")
     float MaxHealth = 100.0f;
 

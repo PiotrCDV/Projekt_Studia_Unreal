@@ -12,6 +12,5 @@ class UE5_PROJEKT_STUDIA_API UBTT_AttackPlayer : public UBTTaskNode
 public:
 	UBTT_AttackPlayer();
 
-	// G³ówna funkcja, któr¹ wykonuje drzewo
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 };
