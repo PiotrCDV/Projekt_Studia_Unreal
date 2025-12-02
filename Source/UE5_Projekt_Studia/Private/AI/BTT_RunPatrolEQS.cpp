@@ -26,24 +26,27 @@ EBTNodeResult::Type UBTT_RunPatrolEQS::ExecuteTask(UBehaviorTreeComponent& Owner
 }
 void UBTT_RunPatrolEQS::OnQueryFinished(TSharedPtr<FEnvQueryResult> Result)
 {
-
-
     AActor* QueryOwner = Cast<AActor>(Result->Owner.Get());
-    if (!QueryOwner) return;
+    APawn* PawnOwner = QueryOwner ? Cast<APawn>(QueryOwner) : nullptr;
+    AAIController* AIController = PawnOwner ? Cast<AAIController>(PawnOwner->GetController()) : nullptr;
 
-    APawn* PawnOwner = Cast<APawn>(QueryOwner);
-    if (!PawnOwner) return;
-
-    AAIController* AIController = Cast<AAIController>(PawnOwner->GetController());
     if (!AIController) return;
 
     UBehaviorTreeComponent* BehaviorTreeComp = Cast<UBehaviorTreeComponent>(AIController->GetBrainComponent());
     if (!BehaviorTreeComp) return;
 
-
     if (Result->IsSuccessful() && Result->Items.Num() > 0)
     {
-        FVector Location = Result->GetItemAsLocation(0);
+
+
+        int32 TotalItems = Result->Items.Num();
+        int32 Range = FMath::Max(1, TotalItems / 4); 
+
+        int32 RandomIndex = FMath::RandRange(0, Range - 1);
+
+        FVector Location = Result->GetItemAsLocation(RandomIndex);
+
+
         BehaviorTreeComp->GetBlackboardComponent()->SetValueAsVector(GetSelectedBlackboardKey(), Location);
 
         FinishLatentTask(*BehaviorTreeComp, EBTNodeResult::Succeeded);
