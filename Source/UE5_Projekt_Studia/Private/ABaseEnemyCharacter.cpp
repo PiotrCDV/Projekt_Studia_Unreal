@@ -1,225 +1,172 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "ABaseEnemyCharacter.h"
-#include "PickableWeapon.h"          
+#include "PickableWeapon.h"           
 #include "AttributesComponent.h"
+#include "AI/EnemyAIController.h" // Do³¹czamy nag³ówek kontrolera
+#include "BehaviorTree/BlackboardComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/CapsuleComponent.h"
 #include "Animation/AnimInstance.h" 
-#include "TimerManager.h"          
+
 AABaseEnemyCharacter::AABaseEnemyCharacter()
 {
-    AttributesComponent = CreateDefaultSubobject<UAttributesComponent>(TEXT("AttributesComponent"));
-    CurrentPawnState = EPawnState::EPS_Idle;
+	AttributesComponent = CreateDefaultSubobject<UAttributesComponent>(TEXT("AttributesComponent"));
+	CurrentPawnState = EPawnState::EPS_Idle;
 }
 
 void AABaseEnemyCharacter::BeginPlay()
 {
-    Super::BeginPlay();
+	Super::BeginPlay();
 
-    if (AttributesComponent)
-    {
-        AttributesComponent->OnDeath.AddDynamic(this, &AABaseEnemyCharacter::HandleDeath);
-    }
+	// 1. Pobieramy nasz nowy kontroler AI
+	AIController = Cast<AEnemyAIController>(GetController());
 
-    PlayerTarget = Cast<AABaseCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	if (AttributesComponent)
+	{
+		AttributesComponent->OnDeath.AddDynamic(this, &AABaseEnemyCharacter::HandleDeath);
+		// 2. Podpinamy delegat wyczerpania staminy
+		AttributesComponent->OnStaminaExhausted.AddDynamic(this, &AABaseEnemyCharacter::HandleStaminaExhausted);
+	}
 
-    if (GetWorld() && PlayerTarget)
-    {
-        GetWorldTimerManager().SetTimer(
-            AttackTimerHandle,
-            this,
-            &AABaseEnemyCharacter::CheckForPlayerAndAttack,
-            0.5f,
-            true
-        );
-    }
-    if (DefaultWeaponClass)
-    {
-        FActorSpawnParameters SpawnParams;
-        SpawnParams.Owner = this;
-        SpawnParams.Instigator = GetInstigator();
+	// 3. Synchronizujemy stan pocz¹tkowy (Idle) z AI
+	SyncPawnStateWithAI(CurrentPawnState);
 
-        APickableWeapon* SpawnedWeapon = GetWorld()->SpawnActor<APickableWeapon>(DefaultWeaponClass, GetActorLocation(), GetActorRotation(), SpawnParams);
+	// 4. Spawnujemy broñ (bez zmian)
+	if (DefaultWeaponClass)
+	{
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this;
+		SpawnParams.Instigator = GetInstigator();
 
-        if (SpawnedWeapon)
-        {
-            EquippedWeapon = SpawnedWeapon;
+		APickableWeapon* SpawnedWeapon = GetWorld()->SpawnActor<APickableWeapon>(DefaultWeaponClass, GetActorLocation(), GetActorRotation(), SpawnParams);
 
-            EquippedWeapon->GetRootComponent()->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponSocketName);
-
-            EquippedWeapon->SetActorEnableCollision(false);
-        }
-    }
+		if (SpawnedWeapon)
+		{
+			EquippedWeapon = SpawnedWeapon;
+			EquippedWeapon->GetRootComponent()->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponSocketName);
+			EquippedWeapon->SetActorEnableCollision(false);
+		}
+	}
 }
 
-void AABaseEnemyCharacter::CheckForPlayerAndAttack()
+// G³ówna funkcja do zmiany stanu - aktualizuje i Pionka, i Blackboard AI
+void AABaseEnemyCharacter::SyncPawnStateWithAI(EPawnState NewState)
 {
-    if (!PlayerTarget || CurrentPawnState == EPawnState::EPS_Dead || CurrentPawnState == EPawnState::EPS_HitReaction)
-    {
-        return;
-    }
-
-    FVector TargetLocation = PlayerTarget->GetActorLocation();
-    FVector SelfLocation = GetActorLocation();
-    float Distance = FVector::Dist(SelfLocation, TargetLocation);
-
-    if (CurrentPawnState != EPawnState::EPS_Attacking)
-    {
-        FVector Direction = (TargetLocation - SelfLocation);
-        Direction.Z = 0.0f;
-        Direction.Normalize();
-
-        FRotator TargetRotation = Direction.Rotation();
-
-        const float RotationSpeed = 10.0f; 
-        FRotator NewRotation = FMath::RInterpTo(
-            GetActorRotation(),
-            TargetRotation,
-            0.5f, 
-            RotationSpeed
-        );
-
-        SetActorRotation(FRotator(0.0f, NewRotation.Yaw, 0.0f));
-    }
-
-
-    if (Distance <= AttackRange)
-    {
-        if (CurrentPawnState != EPawnState::EPS_Attacking)
-        {
-            SetPawnState(EPawnState::EPS_InCombat);
-            TryAttack();
-        }
-    }
-    else
-    {
-        SetPawnState(EPawnState::EPS_Idle);
-    }
+	SetPawnState(NewState);
+	if (AIController)
+	{
+		AIController->SetPawnStateInBlackboard(NewState);
+	}
 }
+
 void AABaseEnemyCharacter::SetPawnState(EPawnState NewState)
 {
-    CurrentPawnState = NewState;
+	CurrentPawnState = NewState;
 }
 
-void AABaseEnemyCharacter::TryAttack()
+// Funkcja wywo³ywana, gdy skoñczy siê stamina
+void AABaseEnemyCharacter::HandleStaminaExhausted()
 {
-    if (CurrentPawnState != EPawnState::EPS_Idle && CurrentPawnState != EPawnState::EPS_InCombat)
-    {
-        return;
-    }
-
-    SetPawnState(EPawnState::EPS_Attacking);
-
-    if (AttackMontage)
-    {
-        PlayAnimMontage(AttackMontage);
-
-
-        if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
-        {
-            FOnMontageEnded EndedDelegate;
-            EndedDelegate.BindUObject(this, &AABaseEnemyCharacter::OnMontageEnded);
-            AnimInstance->Montage_SetEndDelegate(EndedDelegate, AttackMontage);
-        }
-    }
-    else
-    {
-        AttackFinished();
-    }
+	// Prze³¹czamy w stan Wyczerpania -> Behavior Tree zablokuje atakowanie
+	SyncPawnStateWithAI(EPawnState::EPS_Exhausted);
 }
 
-void AABaseEnemyCharacter::AttackFinished()
+// Funkcja wywo³ywana przez Behavior Tree Task "AttackPlayer"
+void AABaseEnemyCharacter::StartAttackFromAI()
 {
-    if (CurrentPawnState == EPawnState::EPS_Attacking)
-    {
-        SetPawnState(EPawnState::EPS_InCombat);
-    }
+	// Atakuj tylko, jeœli nie jesteœ martwy ani trafiony
+	if (CurrentPawnState != EPawnState::EPS_Dead && CurrentPawnState != EPawnState::EPS_HitReaction)
+	{
+		PlayAnimMontage(AttackMontage);
+		// Uwaga: Stan "Attacking" jest ustawiany w samym Tasku BT, tutaj tylko odpalamy animacjê
+	}
 }
 
-void AABaseEnemyCharacter::AttackCanceled()
+void AABaseEnemyCharacter::GetHit_Implementation(AActor* Attacker, float Damage)
 {
-    if (CurrentPawnState != EPawnState::EPS_Dead)
-    {
-        SetPawnState(EPawnState::EPS_InCombat);
-    }
+	if (CurrentPawnState == EPawnState::EPS_Dead) return;
+
+	// Jeœli dosta³ w trakcie ataku -> przerwij atak
+	if (CurrentPawnState == EPawnState::EPS_Attacking)
+	{
+		if (AttackMontage) StopAnimMontage(AttackMontage);
+	}
+
+	// Zadaj obra¿enia
+	AttributesComponent->ApplyDamage(Damage);
+
+	if (AttributesComponent->GetHealth() > 0.f)
+	{
+		// Zmieñ stan na HitReaction (AI przestanie siê ruszaæ)
+		SyncPawnStateWithAI(EPawnState::EPS_HitReaction);
+
+		if (HitSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, HitSound, GetActorLocation());
+		}
+		if (HitReactMontage)
+		{
+			PlayAnimMontage(HitReactMontage);
+
+			// Podpinamy delegat koñca animacji, ¿eby wiedzieæ kiedy wróciæ do walki
+			if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
+			{
+				FOnMontageEnded EndedDelegate;
+				EndedDelegate.BindUObject(this, &AABaseEnemyCharacter::OnMontageEnded);
+				AnimInstance->Montage_SetEndDelegate(EndedDelegate, HitReactMontage);
+			}
+		}
+		else
+		{
+			// Jak nie ma animacji, wracamy od razu
+			SyncPawnStateWithAI(EPawnState::EPS_InCombat);
+		}
+	}
 }
 
 void AABaseEnemyCharacter::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-    if (bInterrupted)
-    {
-        return;
-    }
+	if (bInterrupted) return; // Jeœli przerwano (np. œmierci¹), nie rób nic
 
-    if (Montage == AttackMontage)
-    {
-        AttackFinished();
-    }
-    else if (Montage == HitReactMontage)
-    {
-        if (CurrentPawnState != EPawnState::EPS_Dead)
-        {
-            SetPawnState(EPawnState::EPS_InCombat);
-        }
-    }
-}
-
-
-void AABaseEnemyCharacter::GetHit_Implementation(AActor* Attacker, float Damage)
-{
-    if (CurrentPawnState == EPawnState::EPS_Dead)
-    {
-        return;
-    }
-
-    if (CurrentPawnState == EPawnState::EPS_Attacking)
-    {
-        if (AttackMontage)
-        {
-            StopAnimMontage(AttackMontage);
-        }
-        AttackCanceled(); 
-    }
-
-    AttributesComponent->ApplyDamage(Damage);
-
-    if (AttributesComponent->GetHealth() > 0.f)
-    {
-        SetPawnState(EPawnState::EPS_HitReaction);
-
-        if (HitSound)
-        {
-            UGameplayStatics::PlaySoundAtLocation(this, HitSound, GetActorLocation());
-        }
-        if (HitReactMontage)
-        {
-            PlayAnimMontage(HitReactMontage);
-
-            if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
-            {
-                FOnMontageEnded EndedDelegate;
-                EndedDelegate.BindUObject(this, &AABaseEnemyCharacter::OnMontageEnded);
-                AnimInstance->Montage_SetEndDelegate(EndedDelegate, HitReactMontage);
-            }
-        }
-        else
-        {
-            SetPawnState(EPawnState::EPS_InCombat);
-        }
-    }
+	if (Montage == HitReactMontage)
+	{
+		if (CurrentPawnState != EPawnState::EPS_Dead)
+		{
+			// Koniec animacji trafienia -> wracamy do akcji
+			// Sprawdzamy w AI czy mamy cel, ¿eby wiedzieæ czy InCombat czy Idle
+			EPawnState NewState = EPawnState::EPS_Idle;
+			if (AIController && AIController->GetBlackboardComponent() && AIController->GetBlackboardComponent()->GetValueAsObject(AIController->TargetActorKey))
+			{
+				NewState = EPawnState::EPS_InCombat;
+			}
+			SyncPawnStateWithAI(NewState);
+		}
+	}
+	else if (Montage == AttackMontage)
+	{
+		// Koniec ataku -> wracamy do InCombat
+		if (CurrentPawnState != EPawnState::EPS_Dead)
+		{
+			SyncPawnStateWithAI(EPawnState::EPS_InCombat);
+		}
+	}
 }
 
 void AABaseEnemyCharacter::HandleDeath()
 {
-    GetWorldTimerManager().ClearTimer(AttackTimerHandle);
-    StopAnimMontage();
+	StopAnimMontage();
 
-    SetPawnState(EPawnState::EPS_Dead);
+	// Ustaw stan na Martwy
+	SyncPawnStateWithAI(EPawnState::EPS_Dead);
 
-    GetCharacterMovement()->StopMovementImmediately();
-    GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-    GetMesh()->SetSimulatePhysics(true);
-    GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+	// Poinformuj AI Controller (¿eby Behavior Tree przesta³o dzia³aæ)
+	if (AIController)
+	{
+		AIController->SetIsDeadInBlackboard(true);
+	}
+
+	GetCharacterMovement()->StopMovementImmediately();
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetSimulatePhysics(true);
+	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
 }

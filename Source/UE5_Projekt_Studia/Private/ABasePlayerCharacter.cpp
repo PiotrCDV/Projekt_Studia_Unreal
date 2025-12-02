@@ -307,7 +307,7 @@ void AABasePlayerCharacter::Attack(const FInputActionValue& Value)
         float AttackCost = AttrComp->StaminaCosts.CostAttack;
 
         // TryConsumeStamina: sprawdza, czy mo¿na zap³aciæ, i jeœli tak, zu¿ywa staminê
-        if (!AttrComp->TryConsumeStamina(AttackCost))
+        if (!AttrComp->TryPayStaminaCost(AttackCost))
         {
             // Brak staminy, przerywamy akcjê
             return;

@@ -10,6 +10,9 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeathDelegate);
 // Nowy, szczegó³owy delegat do aktualizacji HUD (zdrowie i stamina)
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnAttributeChangedDelegate, UAttributesComponent*, OwningComp, float, NewValue, float, Delta, float, MaxValue);
 
+// NOWY: Deklaracja delegata wywo³ywanego, gdy Stamina spadnie do 0 (Punkt 121)
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStaminaExhaustedDelegate);
+
 // Nowa struktura do przechowywania kosztów akcji
 USTRUCT(BlueprintType)
 struct FStaminaCostStruct
@@ -23,10 +26,10 @@ struct FStaminaCostStruct
     float CostSprint = 5.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina Costs")
-    float CostJump = 20.0f; // Dodajemy koszt skoku
+    float CostJump = 20.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina Costs")
-    float StaminaRegenRate = 5.0f; // Szybkoœæ regeneracji na sekundê
+    float StaminaRegenRate = 5.0f;
 };
 
 
@@ -43,10 +46,14 @@ public:
     FOnDeathDelegate OnDeath;
 
     UPROPERTY(BlueprintAssignable, Category = "Events")
-    FOnAttributeChangedDelegate OnHealthChanged; // Delegat do aktualizacji paska zdrowia
+    FOnAttributeChangedDelegate OnHealthChanged;
 
     UPROPERTY(BlueprintAssignable, Category = "Events")
-    FOnAttributeChangedDelegate OnStaminaChanged; // Delegat do aktualizacji paska staminy
+    FOnAttributeChangedDelegate OnStaminaChanged;
+
+    // NOWY: Delegat Stamina Exhausted
+    UPROPERTY(BlueprintAssignable, Category = "Events")
+    FOnStaminaExhaustedDelegate OnStaminaExhausted;
 
     // --- ZDROWIE ---
     UFUNCTION(BlueprintCallable, Category = "Attributes")
@@ -62,8 +69,13 @@ public:
     void SetHealth(float NewHealth);
 
     // --- STAMINA ---
+    // Zmieniona nazwa TryConsumeStamina -> TryPayStaminaCost (Punkt 122)
     UFUNCTION(BlueprintCallable, Category = "Attributes")
-    bool TryConsumeStamina(float StaminaCost);
+    bool TryPayStaminaCost(float StaminaCost);
+
+    // NOWY: Sprawdza, czy mo¿e zap³aciæ (Punkt 120)
+    UFUNCTION(BlueprintCallable, Category = "Attributes")
+    bool CanPayStaminaCost(float StaminaCost) const { return Stamina >= StaminaCost; }
 
     UFUNCTION(BlueprintCallable, Category = "Attributes")
     float GetStamina() const { return Stamina; }
@@ -71,14 +83,13 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Attributes")
     float GetMaxStamina() const { return MaxStamina; }
 
-    // Struktura Kosztów (dostêpna w Blueprintach)
+    // Struktura Kosztów
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes")
     FStaminaCostStruct StaminaCosts;
 
 protected:
     virtual void BeginPlay() override;
 
-    // W³¹cz Tick, aby umo¿liwiæ regeneracjê staminy
     virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
     // --- Zmienne ---

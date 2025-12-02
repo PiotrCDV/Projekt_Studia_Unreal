@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -11,67 +9,86 @@
 
 class UAttributesComponent;
 class APickableWeapon;
+class AEnemyAIController; // Forward declaration nowej klasy
 
 UCLASS()
 class UE5_PROJEKT_STUDIA_API AABaseEnemyCharacter : public AABaseCharacter, public ICombatInterface
 {
-    GENERATED_BODY()
+	GENERATED_BODY()
 
 public:
-    AABaseEnemyCharacter();
+	AABaseEnemyCharacter();
 
-    virtual void GetHit_Implementation(AActor* Attacker, float Damage) override;
+	virtual void GetHit_Implementation(AActor* Attacker, float Damage) override;
 
-    UFUNCTION(BlueprintCallable, Category = "Combat")
-    void SetPawnState(EPawnState NewState);
+	// Funkcje zmiany stanu
+	UFUNCTION(BlueprintCallable, Category = "Combat")
+	void SetPawnState(EPawnState NewState);
 
-    UFUNCTION(BlueprintPure, Category = "Combat")
-    EPawnState GetPawnState() const { return CurrentPawnState; }
+	UFUNCTION(BlueprintPure, Category = "Combat")
+	EPawnState GetPawnState() const { return CurrentPawnState; }
 
 protected:
-    virtual void BeginPlay() override;
+	virtual void BeginPlay() override;
 
-    UFUNCTION(BlueprintCallable, Category = "Combat")
-    void TryAttack();
-    void AttackFinished();
-    void AttackCanceled();
+	// Logika zakoñczenia animacji (Ataku lub HitReact)
+	void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
-    FTimerHandle AttackTimerHandle;
+	// --- INTEGRACJA Z AI ---
 
-    UFUNCTION()
-    void CheckForPlayerAndAttack();
+	// Synchronizuje stan (zmienna w klasie + Blackboard w kontrolerze)
+public: void SyncPawnStateWithAI(EPawnState NewState);
 
-    void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	  // Wywo³ywana przez Behavior Tree Task, ¿eby zacz¹æ machaæ mieczem
+	  UFUNCTION(BlueprintCallable, Category = "AI")
+	  void StartAttackFromAI();
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-    UAttributesComponent* AttributesComponent;
+	  // Wywo³ywana przez AttributesComponent, gdy stamina spadnie do 0
+	  UFUNCTION()
+	  void HandleStaminaExhausted();
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
-    UAnimMontage* HitReactMontage;
+	  // Referencja do naszego nowego kontrolera
+	  UPROPERTY()
+	  class AEnemyAIController* AIController;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
-    UAnimMontage* AttackMontage;
+	  // Koszt staminy potrzebny do wykonania ataku
+	  UPROPERTY(EditDefaultsOnly, Category = "Combat")
+	  float AttackStaminaCost = 25.0f;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Combat")
-    USoundBase* HitSound;
+	  // Gettery dla Tasków BT
+	  FORCEINLINE class UAttributesComponent* GetAttributesComponent() const { return AttributesComponent; }
+	  FORCEINLINE float GetAttackStaminaCost() const { return AttackStaminaCost; }
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
-    EPawnState CurrentPawnState;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Attack")
-    float AttackRange = 250.0f;
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UAttributesComponent* AttributesComponent;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
-    AABaseCharacter* PlayerTarget = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
+	UAnimMontage* HitReactMontage;
 
-    UFUNCTION()
-    void HandleDeath();
-    UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Combat")
-    APickableWeapon* EquippedWeapon;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
+	UAnimMontage* AttackMontage;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Combat")
-    TSubclassOf<APickableWeapon> DefaultWeaponClass;
+	UPROPERTY(EditDefaultsOnly, Category = "Combat")
+	USoundBase* HitSound;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Combat")
-    FName WeaponSocketName = TEXT("WeaponSocket");
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
+	EPawnState CurrentPawnState;
+
+	// Zasiêg ataku (u¿ywany teraz w Behavior Tree, ale warto zostawiæ zmienn¹)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI|Attack")
+	float AttackRange = 250.0f;
+
+	UFUNCTION()
+	void HandleDeath();
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Combat")
+	APickableWeapon* EquippedWeapon;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Combat")
+	TSubclassOf<APickableWeapon> DefaultWeaponClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Combat")
+	FName WeaponSocketName = TEXT("WeaponSocket");
 };
