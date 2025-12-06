@@ -9,7 +9,6 @@
 
 // --- DODANE DLA PUNKTU 5 (KOMUNIKACJA HUD) ---
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPawnStateChanged, EPawnState, NewState);
-// ----------------------------------------------
 
 class UMainHUD;
 class UAttributesComponent;
@@ -32,27 +31,21 @@ public:
     void EndWeaponTrace();
 
 public:
-    // Zmienna przechowuj¹ca aktualny stan
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
     EPawnState CurrentPawnState = EPawnState::EPS_Idle;
 
-    // Funkcja do zmiany stanu (dostêpna z Blueprint)
     UFUNCTION(BlueprintCallable, Category = "State")
-    virtual void SetPawnState(EPawnState NewState); // Usuniêto 'override' jeœli brak w AABaseCharacter
+    virtual void SetPawnState(EPawnState NewState); 
 
 public:
-    // Funkcja dostêpu (Get)
     UFUNCTION(BlueprintPure, Category = "State")
     FORCEINLINE EPawnState GetCurrentPawnState() const { return CurrentPawnState; }
 
-    // --- DODANE DLA PUNKTU 5 (DELEGAT STANU) ---
     UPROPERTY(BlueprintAssignable, Category = "Events|State")
     FOnPawnStateChanged OnPawnStateChanged;
-    // ---------------------------------------------
 
 
 protected:
-    // **NOWE ZMIENNE HUD**
     UPROPERTY(EditDefaultsOnly, Category = "HUD")
     TSubclassOf<class UMainHUD> PlayerHUDWidgetClass;
 
@@ -62,7 +55,6 @@ protected:
     void InitializeHUD();
     void SynchronizeHUD();
 
-    // **NOWE FUNKCJE DLA DELEGATÓW (CALLBACKS)**
     UFUNCTION()
     void HandleHealthUpdate(UAttributesComponent* OwningComp, float Current, float Delta, float Max);
 
@@ -72,16 +64,13 @@ protected:
 
 
 private:
-    // Zmienna stanu sprintu
     bool bIsSprinting = false;
 
 protected:
-    // W³aœciwoœæ komponentu
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
     class UAttributesComponent* AttributesComponent;
 
 public:
-    // Funkcja dostêpu (FIX B£ÊDU E0020)
     FORCEINLINE UAttributesComponent* GetAttributesComponent() const { return AttributesComponent; }
 
 public:
@@ -96,13 +85,11 @@ public:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
     UInputAction* LookAction;
 
-    // --- DODANE AKCJE DLA PUNKTU 3/4 ---
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
     UInputAction* JumpAction;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
     UInputAction* SprintAction;
-    // -----------------------------------
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Interaction")
     UInteractionComponent* InteractionComponent;

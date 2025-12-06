@@ -1,9 +1,10 @@
 // Plik: UMainHUD.cpp
 
 #include "Widget/MainHUD.h"
-#include "Components/TextBlock.h" // Wymagany do u¿ycia UTextBlock
-#include "Enum/PawnState.h"      // Wymagany do u¿ycia EPawnState
-#include "Components/ProgressBar.h" // Upewnij siê, ¿e ten jest, jeœli nie jest w prekompilacji
+#include "TimerManager.h"
+#include "Components/TextBlock.h" 
+#include "Enum/PawnState.h"     
+#include "Components/ProgressBar.h" 
 
 void UMainHUD::UpdateHealth(float Current, float Max)
 {
@@ -20,10 +21,6 @@ void UMainHUD::UpdateStamina(float Current, float Max)
         StaminaBar->SetPercent(Current / Max);
     }
 }
-
-// -----------------------------------------------------------------------------------
-// IMPLEMENTACJA PUNKTU 5 (WIZUALNA INFORMACJA ZWROTNA - HUD)
-// -----------------------------------------------------------------------------------
 
 FString UMainHUD::GetPawnStateString(EPawnState State) const
 {
@@ -48,36 +45,72 @@ FString UMainHUD::GetPawnStateString(EPawnState State) const
 
 void UMainHUD::HandlePawnStateUpdate(EPawnState NewState)
 {
-    // 1. Aktualizacja tekstu
     if (StateText)
     {
         FString NewText = GetPawnStateString(NewState);
         StateText->SetText(FText::FromString(NewText));
 
-        // 2. Aktualizacja koloru
         FSlateColor NewColor;
 
         if (NewState == EPawnState::EPS_Exhausted || NewState == EPawnState::EPS_Dead)
         {
-            // Czerwony dla stanu krytycznego (Wyczerpanie, Œmieræ)
             NewColor = FSlateColor(FLinearColor::Red);
         }
         else if (NewState == EPawnState::EPS_InCombat || NewState == EPawnState::EPS_Attacking)
         {
-            // ¯ó³ty dla stanów walki
             NewColor = FSlateColor(FLinearColor::Yellow);
         }
         else if (NewState == EPawnState::EPS_HitReaction)
         {
-            // Pomarañczowy dla reakcji na obra¿enia
-            NewColor = FSlateColor(FLinearColor(1.0f, 0.5f, 0.0f)); // Pomarañczowy
+            NewColor = FSlateColor(FLinearColor(1.0f, 0.5f, 0.0f)); 
         }
         else
         {
-            // Bia³y dla domyœlnych stanów (IDLE)
             NewColor = FSlateColor(FLinearColor::White);
         }
 
         StateText->SetColorAndOpacity(NewColor);
+    }
+
+}
+void UMainHUD::DisplayEnemyHealth(UAttributesComponent* EnemyAttributes)
+{
+    if (!EnemyAttributes || !EnemyHealthBar) return;
+
+    if (LastEnemyAttributes)
+    {
+        LastEnemyAttributes->OnHealthChanged.RemoveDynamic(this, &UMainHUD::UpdateEnemyHealthBar);
+    }
+
+    LastEnemyAttributes = EnemyAttributes;
+    LastEnemyAttributes->OnHealthChanged.AddDynamic(this, &UMainHUD::UpdateEnemyHealthBar);
+
+    UpdateEnemyHealthBar(nullptr, EnemyAttributes->GetHealth(), 0.0f, EnemyAttributes->GetMaxHealth());
+
+    EnemyHealthBar->SetVisibility(ESlateVisibility::Visible);
+
+    GetWorld()->GetTimerManager().SetTimer(HideEnemyBarTimerHandle, this, &UMainHUD::HideEnemyHealthBar, 3.0f, false);
+}
+
+void UMainHUD::UpdateEnemyHealthBar(UAttributesComponent* OwningComp, float Current, float Delta, float Max)
+{
+    if (EnemyHealthBar && Max > 0.0f)
+    {
+        float Percent = Current / Max;
+        EnemyHealthBar->SetPercent(Percent);
+    }
+}
+
+void UMainHUD::HideEnemyHealthBar()
+{
+    if (EnemyHealthBar)
+    {
+        EnemyHealthBar->SetVisibility(ESlateVisibility::Hidden);
+
+        if (LastEnemyAttributes)
+        {
+            LastEnemyAttributes->OnHealthChanged.RemoveDynamic(this, &UMainHUD::UpdateEnemyHealthBar);
+            LastEnemyAttributes = nullptr;
+        }
     }
 }
